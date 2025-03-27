@@ -14,7 +14,6 @@ from datasets import load_dataset
 #     "Model②(Multilingual)-jp": "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
 # }
 
-espnet_downloader = ModelDownloader()
 
 singer_embeddings = {
     "espnet/aceopencpop_svs_visinger2_40singer_pretrain": {
@@ -51,8 +50,8 @@ def svs_warmup(config):
     Return: the inference prototype function (which creates pitch/duration and runs model-specific inference)
     """
     if config.model_path.startswith("espnet"):
-        downloaded = espnet_downloader.download_and_unpack(
-            config.model_path, config.cache_dir)
+        espnet_downloader = ModelDownloader(config.cache_dir)
+        downloaded = espnet_downloader.download_and_unpack(config.model_path)
         model = SingingGenerate(
             train_config=downloaded["train_config"],
             model_file=downloaded["model_file"],
