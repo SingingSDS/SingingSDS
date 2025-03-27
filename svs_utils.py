@@ -1,4 +1,9 @@
-from util import preprocess_input, postprocess_phn, get_tokenizer, load_pitch_dict, get_pinyin
+from util import (
+    preprocess_input,
+    postprocess_phn,
+    get_tokenizer,
+    get_pinyin,
+)
 from espnet_model_zoo.downloader import ModelDownloader
 from espnet2.bin.svs_inference import SingingGenerate
 import librosa
@@ -7,6 +12,7 @@ import numpy as np
 import random
 import json
 from datasets import load_dataset
+
 # the code below should be in app.py than svs_utils.py
 # espnet_model_dict = {
 #     "Model①(Chinese)-zh": "espnet/aceopencpop_svs_visinger2_40singer_pretrain",
@@ -55,7 +61,7 @@ def svs_warmup(config):
         model = SingingGenerate(
             train_config=downloaded["train_config"],
             model_file=downloaded["model_file"],
-            device=config.device
+            device=config.device,
         )
     else:
         raise NotImplementedError(f"Model {config.model_path} not supported")
@@ -63,8 +69,8 @@ def svs_warmup(config):
 
 
 def svs_text_preprocessor(model_path, texts, lang):
-    '''
-    Input: 
+    """
+    Input:
         - model_path (str), for getting the corresponding tokenizer
         - texts (str), in Chinese character or Japanese character
         - lang (str), language label jp/zh, input if is not espnet model
@@ -74,7 +80,7 @@ def svs_text_preprocessor(model_path, texts, lang):
         - sybs (phn w/ _ list), each element as 'k@zh_e@zh'
         - labels (phn w/o _ list), each element as 'k@zh'
 
-    '''
+    """
     fs = 44100
 
     if texts is None:
@@ -122,22 +128,21 @@ def svs_text_preprocessor(model_path, texts, lang):
 
 
 def svs_get_batch(model_path, answer_text, lang, random_gen=True):
-    '''
-    Input: 
+    """
+    Input:
         - answer_text (str), in Chinese character or Japanese character
         - model_path (str), loaded pretrained model name
         - lang (str), language label jp/zh, input if is not espnet model
     Output:
-        - batch (dict)  
+        - batch (dict)
 
-    {'score': (75, [[0, 0.48057527844210024, 'n@zhi@zh', 66, 'n@zh_i@zh'], 
-            [0.48057527844210024, 0.8049310140914353, 'k@zhe@zh', 57, 'k@zh_e@zh'], 
-            [0.8049310140914353, 1.1905956333296641, 'm@zhei@zh', 64, 'm@zh_ei@zh']]), 
+    {'score': (75, [[0, 0.48057527844210024, 'n@zhi@zh', 66, 'n@zh_i@zh'],
+            [0.48057527844210024, 0.8049310140914353, 'k@zhe@zh', 57, 'k@zh_e@zh'],
+            [0.8049310140914353, 1.1905956333296641, 'm@zhei@zh', 64, 'm@zh_ei@zh']]),
      'text': 'n@zh i@zh k@zh e@zh m@zh ei@zh'}
-    '''
+    """
     tempo = 120
-    lyric_ls, sybs, labels = svs_text_preprocessor(
-        model_path, answer_text, lang)
+    lyric_ls, sybs, labels = svs_text_preprocessor(model_path, answer_text, lang)
     len_note = len(lyric_ls)
     notes = []
     if random_gen:
@@ -146,7 +151,7 @@ def svs_get_batch(model_path, answer_text, lang, random_gen=True):
         for id_lyric in range(len_note):
             pitch = random.randint(57, 69)
             period = round(random.uniform(0.1, 0.5), 4)
-            ed = st+period
+            ed = st + period
             note = [st, ed, lyric_ls[id_lyric], pitch, sybs[id_lyric]]
             st = ed
             notes.append(note)
@@ -175,8 +180,7 @@ svs = None
 
 
 def svs_inference(model_name, model_svs, answer_text, lang, random_gen=True, fs=44100):
-    batch = svs_get_batch(model_name, answer_text, lang,
-                          random_gen=random_gen)
+    batch = svs_get_batch(model_name, answer_text, lang, random_gen=random_gen)
 
     # Infer
     spk = "singer1 (male)"
@@ -209,7 +213,8 @@ def svs_inference(model_name, model_svs, answer_text, lang, random_gen=True, fs=
 
 def singmos_warmup(config):
     predictor = torch.hub.load(
-        "South-Twilight/SingMOS:v0.2.0", "singing_ssl_mos", trust_repo=True)
+        "South-Twilight/SingMOS:v0.2.0", "singing_ssl_mos", trust_repo=True
+    )
     return predictor, "South-Twilight/SingMOS:v0.2.0"
 
 
@@ -230,8 +235,7 @@ def estimate_sentence_length(query, config, song2note_lengths):
         metadata = {"song_name": song_name}
         return phrase_length, metadata
     else:
-        raise NotImplementedError(
-            f"melody source {config.melody_source} not supported")
+        raise NotImplementedError(f"melody source {config.melody_source} not supported")
 
 
 def align_score_and_text(segment_iterator, lyric_ls, sybs, labels):
@@ -240,22 +244,43 @@ def align_score_and_text(segment_iterator, lyric_ls, sybs, labels):
     notes_info = []
     while lyric_idx < len(lyric_ls):
         score = next(segment_iterator)
-        for note_start_time, note_end_time, reference_note_lyric, note_midi in zip(score['note_start_times'], score['note_end_times'], score["note_lyrics"], score['note_midi']):
+        for note_start_time, note_end_time, reference_note_lyric, note_midi in zip(
+            score["note_start_times"],
+            score["note_end_times"],
+            score["note_lyrics"],
+            score["note_midi"],
+        ):
             if reference_note_lyric in ["<AP>", "<SP>"]:
-                notes_info.append([note_start_time, note_end_time, reference_note_lyric.strip("<>"), note_midi, reference_note_lyric.strip("<>")])
+                notes_info.append(
+                    [
+                        note_start_time,
+                        note_end_time,
+                        reference_note_lyric.strip("<>"),
+                        note_midi,
+                        reference_note_lyric.strip("<>"),
+                    ]
+                )
                 text.append(reference_note_lyric.strip("<>"))
             else:
-                notes_info.append([note_start_time, note_end_time, lyric_ls[lyric_idx], note_midi, sybs[lyric_idx]])
+                notes_info.append(
+                    [
+                        note_start_time,
+                        note_end_time,
+                        lyric_ls[lyric_idx],
+                        note_midi,
+                        sybs[lyric_idx],
+                    ]
+                )
                 text += sybs[lyric_idx].split("_")
                 lyric_idx += 1
                 if lyric_idx >= len(lyric_ls):
                     break
     batch = {
         "score": (
-            score['tempo'], # Assume the tempo is the same for all segments
-            notes_info
+            score["tempo"],  # Assume the tempo is the same for all segments
+            notes_info,
         ),
-        "text": " ".join(text)
+        "text": " ".join(text),
     }
     return batch
 
@@ -273,15 +298,17 @@ def song_segment_iterator(song_db, metadata):
 
 
 def load_song_database():
-    song_db = load_dataset("jhansss/kising_score_segments",
-                           cache_dir="cache")["train"].to_pandas()
+    song_db = load_dataset(
+        "jhansss/kising_score_segments", cache_dir="cache", split="train"
+    ).to_pandas()
     song_db.set_index("segment_id", inplace=True)
 
     with open("data/song2note_lengths.json", "r") as f:
         song2note_lengths = json.load(f)
-    return song2note_lengths,song_db
+    return song2note_lengths, song_db
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     import argparse
 
     # -------- demo code for generate audio from randomly selected song ---------#
@@ -300,23 +327,23 @@ if __name__ == '__main__':
     song2note_lengths, song_db = load_song_database()
 
     # get song_name and phrase_length
-    phrase_length, metadata = estimate_sentence_length(
-        None, config, song2note_lengths)
+    phrase_length, metadata = estimate_sentence_length(None, config, song2note_lengths)
 
     # then, phrase_length info should be added to llm prompt, and get the answer lyrics from llm
     # e.g. answer_text = "天气真好\n空气清新"
     answer_text = "天气真好\n空气清新"
     lyric_ls, sybs, labels = svs_text_preprocessor(
-        config.model_path, answer_text, config.lang)
+        config.model_path, answer_text, config.lang
+    )
     segment_iterator = song_segment_iterator(song_db, metadata)
     batch = align_score_and_text(segment_iterator, lyric_ls, sybs, labels)
-    singer_embedding = np.load(
-        singer_embeddings[config.model_path]["singer2 (female)"])
+    singer_embedding = np.load(singer_embeddings[config.model_path]["singer2 (female)"])
     lid = np.array([langs[config.lang]])
     output_dict = model(batch, lids=lid, spembs=singer_embedding)
     wav_info = output_dict["wav"].cpu().numpy()
     # write wav to output_retrieved.wav
     import soundfile as sf
+
     sf.write("output_retrieved.wav", wav_info, samplerate=44100)
 
     # -------- some other processes ---------#

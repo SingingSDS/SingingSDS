@@ -8,6 +8,7 @@ import pyopenjtalk
 from resource.pinyin_dict import PINYIN_DICT
 from pypinyin import lazy_pinyin
 
+
 def preprocess_input(src_str, seg_syb=" "):
     src_str = src_str.replace("\n", seg_syb)
     src_str = src_str.replace(" ", seg_syb)
@@ -29,7 +30,6 @@ def pyopenjtalk_g2p(text) -> List[str]:
             for warning in w:
                 if "No phoneme" in str(warning.message):
                     return False
- 
     phones = phones.split(" ")
     return phones
 
@@ -73,21 +73,10 @@ def get_pinyin(texts):
     pinyin_list = lazy_pinyin(texts)
     text_list = []
     for text in pinyin_list:
-        if text[0] == "S" or text[0] == "A" or text[0] == '-':
-            sp_strs = re.findall(r'-|AP|SP', text)
+        if text[0] == "S" or text[0] == "A" or text[0] == "-":
+            sp_strs = re.findall(r"-|AP|SP", text)
             for phn in sp_strs:
                 text_list.append(phn)
         else:
             text_list.append(text)
     return text_list
-
-
-def load_pitch_dict(file_path = "resource/midi-note.scp"):
-    pitch_dict = {}
-    with open(file_path, "r", encoding="utf-8") as f:
-        for line in f:
-            items = line.strip().split()
-            pitch_dict[items[0]] = int(items[1])
-            pitch_dict[items[1]] = int(items[1])
-    return pitch_dict
-
