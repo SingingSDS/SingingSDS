@@ -227,7 +227,7 @@ def singmos_evaluation(predictor, wav_info, fs):
 
 
 def estimate_sentence_length(query, config, song2note_lengths):
-    if config.melody_source == "random_select":
+    if config.melody_source.startswith("random_select"):
         # random select a song from database, and return its value in the phrase_length column
         # return phrase_length column and song name
         song_name = random.choice(list(song2note_lengths.keys()))
@@ -238,7 +238,7 @@ def estimate_sentence_length(query, config, song2note_lengths):
         raise NotImplementedError(f"melody source {config.melody_source} not supported")
 
 
-def align_score_and_text(segment_iterator, lyric_ls, sybs, labels):
+def align_score_and_text(segment_iterator, lyric_ls, sybs, labels, config):
     text = []
     lyric_idx = 0
     notes_info = []
@@ -261,6 +261,16 @@ def align_score_and_text(segment_iterator, lyric_ls, sybs, labels):
                     ]
                 )
                 text.append(reference_note_lyric.strip("<>"))
+            elif reference_note_lyric in ["-", "——"] and config.melody_source == "random_select.take_lyric_continuation":
+                notes_info.append(
+                    [
+                        note_start_time,
+                        note_end_time,
+                        reference_note_lyric,
+                        note_midi,
+                        text[-1],
+                    ]
+                )
             else:
                 notes_info.append(
                     [
@@ -316,7 +326,7 @@ if __name__ == "__main__":
         model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
         cache_dir="cache",
         device="cpu",
-        melody_source="random_select",
+        melody_source="random_select.take_lyric_continuation",
         lang="zh",
     )
 
@@ -331,12 +341,12 @@ if __name__ == "__main__":
 
     # then, phrase_length info should be added to llm prompt, and get the answer lyrics from llm
     # e.g. answer_text = "天气真好\n空气清新"
-    answer_text = "天气真好\n空气清新"
+    answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
     lyric_ls, sybs, labels = svs_text_preprocessor(
         config.model_path, answer_text, config.lang
     )
     segment_iterator = song_segment_iterator(song_db, metadata)
-    batch = align_score_and_text(segment_iterator, lyric_ls, sybs, labels)
+    batch = align_score_and_text(segment_iterator, lyric_ls, sybs, labels, config)
     singer_embedding = np.load(singer_embeddings[config.model_path]["singer2 (female)"])
     lid = np.array([langs[config.lang]])
     output_dict = model(batch, lids=lid, spembs=singer_embedding)
