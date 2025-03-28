@@ -1,0 +1,4 @@
+git+https://github.com/South-Twilight/espnet
+espnet_model_zoo
+pyopenjtalk
+datasets
