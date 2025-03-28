@@ -11,7 +11,9 @@ import torch
 import numpy as np
 import random
 import json
-from datasets import load_dataset
+
+import argparse
+import soundfile as sf
 
 # the code below should be in app.py than svs_utils.py
 # espnet_model_dict = {
@@ -165,7 +167,7 @@ def svs_get_batch(model_path, answer_text, lang, random_gen=True):
             "text": phns_str,
         }
 
-    print(batch)
+    # print(batch)
     return batch
 
 
@@ -319,49 +321,47 @@ def load_song_database():
 
 
 if __name__ == "__main__":
-    import argparse
 
     # -------- demo code for generate audio from randomly selected song ---------#
     config = argparse.Namespace(
         model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
         cache_dir="cache",
-        device="cpu",
-        melody_source="random_select.take_lyric_continuation",
+        device="cuda", # "cpu"
+        melody_source="random_generate", # "random_select.take_lyric_continuation"
         lang="zh",
     )
 
     # load model
     model = svs_warmup(config)
 
-    # load song database: jhansss/kising_score_segments
-    song2note_lengths, song_db = load_song_database()
-
-    # get song_name and phrase_length
-    phrase_length, metadata = estimate_sentence_length(None, config, song2note_lengths)
-
-    # then, phrase_length info should be added to llm prompt, and get the answer lyrics from llm
-    # e.g. answer_text = "天气真好\n空气清新"
     answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
-    lyric_ls, sybs, labels = svs_text_preprocessor(
-        config.model_path, answer_text, config.lang
-    )
-    segment_iterator = song_segment_iterator(song_db, metadata)
-    batch = align_score_and_text(segment_iterator, lyric_ls, sybs, labels, config)
-    singer_embedding = np.load(singer_embeddings[config.model_path]["singer2 (female)"])
-    lid = np.array([langs[config.lang]])
-    output_dict = model(batch, lids=lid, spembs=singer_embedding)
-    wav_info = output_dict["wav"].cpu().numpy()
-    # write wav to output_retrieved.wav
-    import soundfile as sf
 
-    sf.write("output_retrieved.wav", wav_info, samplerate=44100)
-
-    # -------- some other processes ---------#
-    # get answer text from LLM
-    answer_text = "你真是太美啦"
-    lang = "zh"
     sample_rate = 44100
-    model_path = "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained"  # temp hard code
-    wav_info = svs_inference(config.model_path, model, answer_text, lang=config.lang, random_gen=True, fs=sample_rate)
-    wav_info = wav_info * 32767
-    wav.write("output_random.wav", sample_rate, wav_info.astype('int16'))
+
+    if config.melody_source.startswith("random_select"):
+        # load song database: jhansss/kising_score_segments
+        from datasets import load_dataset
+        song2note_lengths, song_db = load_song_database()
+
+        # get song_name and phrase_length
+        phrase_length, metadata = estimate_sentence_length(None, config, song2note_lengths)
+
+        # then, phrase_length info should be added to llm prompt, and get the answer lyrics from llm
+        # e.g. answer_text = "天气真好\n空气清新"
+        lyric_ls, sybs, labels = svs_text_preprocessor(
+            config.model_path, answer_text, config.lang
+        )
+        segment_iterator = song_segment_iterator(song_db, metadata)
+        batch = align_score_and_text(segment_iterator, lyric_ls, sybs, labels, config)
+        singer_embedding = np.load(singer_embeddings[config.model_path]["singer2 (female)"])
+        lid = np.array([langs[config.lang]])
+        output_dict = model(batch, lids=lid, spembs=singer_embedding)
+        wav_info = output_dict["wav"].cpu().numpy()
+
+    
+    elif config.melody_source.startswith("random_generate"):
+        wav_info = svs_inference(config.model_path, model, answer_text, lang=config.lang, random_gen=True, fs=sample_rate)
+
+    # write wav to output_retrieved.wav
+    save_name = config.melody_source.split('.')[0]
+    sf.write(f"{save_name}.wav", wav_info, samplerate=sample_rate)
