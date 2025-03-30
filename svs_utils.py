@@ -206,14 +206,14 @@ def svs_inference(model_name, model_svs, answer_text, lang, random_gen=True, fs=
         output_dict = svs(batch, sids=sid)
     else:
         lid = np.array([langs[lang]])
-        spk_embed = np.load("resource/singer/singer_embedding_ace-1.npy")
+        spk_embed = np.load("resource/singer/singer_embedding_ace-2.npy")
         output_dict = svs(batch, lids=lid, spembs=spk_embed)
     wav_info = output_dict["wav"].cpu().numpy()
 
     return wav_info
 
 
-def singmos_warmup(config):
+def singmos_warmup():
     predictor = torch.hub.load(
         "South-Twilight/SingMOS:v0.2.0", "singing_ssl_mos", trust_repo=True
     )

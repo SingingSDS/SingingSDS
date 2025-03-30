@@ -4,7 +4,6 @@ import warnings
 from typing import List
 import re
 
-import pyopenjtalk
 from resource.pinyin_dict import PINYIN_DICT
 from pypinyin import lazy_pinyin
 
@@ -66,6 +65,7 @@ def get_tokenizer(model, lang):
                     zh_plan = plan
             return lambda text: split_pinyin_ace(text, zh_plan)
     elif lang == "jp":
+        import pyopenjtalk
         return pyopenjtalk_g2p
 
 

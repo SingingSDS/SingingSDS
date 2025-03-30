@@ -1,4 +1,9 @@
-git+https://github.com/South-Twilight/espnet
+git+https://github.com/South-Twilight/espnet==202402
 espnet_model_zoo
-pyopenjtalk
+# pyopenjtalk
 datasets
+torchaudio
+typeguard==4.4.0
+jiwer
+fastapi
+uvicorn
