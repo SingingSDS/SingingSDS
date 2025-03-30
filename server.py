@@ -86,12 +86,9 @@ async def process_audio(file: UploadFile = File(...)):
         f.write(output)
 
     wav_info = svs_inference(
-        config.model_path,
-        svs_model,
         output,
-        lang=config.lang,
-        random_gen=True,
-        fs=44100
+        svs_model,
+        config,
     )
     sf.write("tmp/response.wav", wav_info, samplerate=44100)
 

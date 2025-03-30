@@ -21,6 +21,7 @@ def postprocess_phn(phns, model_name, lang):
 
 
 def pyopenjtalk_g2p(text) -> List[str]:
+    import pyopenjtalk
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         # phones is a str object separated by space
@@ -53,20 +54,25 @@ def split_pinyin_py(pinyin: str) -> tuple[str]:
 
 
 def get_tokenizer(model, lang):
-    if lang == "zh":
-        if "Chinese" in model:
-            print("hello")
+    if model == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
+        if lang == "zh":
             return lambda text: split_pinyin_py(text)
         else:
+            raise ValueError(f"Only support Chinese language for {model}")
+    elif model == "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained":
+        if lang == "zh":
             with open(os.path.join("resource/all_plans.json"), "r") as f:
                 all_plan_dict = json.load(f)
             for plan in all_plan_dict["plans"]:
                 if plan["language"] == "zh":
                     zh_plan = plan
             return lambda text: split_pinyin_ace(text, zh_plan)
-    elif lang == "jp":
-        import pyopenjtalk
-        return pyopenjtalk_g2p
+        elif lang == "jp":
+            return pyopenjtalk_g2p
+        else:
+            raise ValueError(f"Only support Chinese and Japanese language for {model}")
+    else:
+        raise ValueError(f"Only support espnet/aceopencpop_svs_visinger2_40singer_pretrain and espnet/mixdata_svs_visinger2_spkembed_lang_pretrained for now")
 
 
 def get_pinyin(texts):
