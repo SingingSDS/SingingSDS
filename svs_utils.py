@@ -273,6 +273,7 @@ def align_score_and_text(segment_iterator, lyric_ls, sybs, labels, config):
                         text[-1],
                     ]
                 )
+                text.append(text[-1])
             else:
                 notes_info.append(
                     [
