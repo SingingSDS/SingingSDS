@@ -9,7 +9,19 @@ combined = combined.filter(lambda x: x["singer"] == "barber")
 
 # 3. create a new column, which counts the nonzero numbers in the list in the note_midi column
 combined = combined.map(
-    lambda x: {"note_midi_length": len([n for n in x["note_midi"] if n != 0])}
+    lambda x: {
+        "note_midi_length": len([n for n in x["note_midi"] if n != 0]),
+        "lyric_word_length": len(
+            [word for word in x["note_lyrics"] if word not in ["<AP>", "<SP>", "-"]]
+        ),  # counts the number of actual words (or characters for, e.g., Chinese/Japanese)
+    }
+)
+combined = combined.map(
+    lambda x: {
+        "lyric_word_length": len(
+            [word for word in x["note_lyrics"] if word not in ["<AP>", "<SP>", "-"]]
+        )
+    }  # counts the number of actual words (or characters for, e.g., Chinese/Japanese)
 )
 
 # 4. sort by segment_id
@@ -19,6 +31,7 @@ combined = combined.sort("segment_id")
 prev_songid = None
 prev_song_segment_id = None
 song2note_lengths = {}
+song2word_lengths = {}
 for row in combined:
     # segment_id: kising_barber_{songid}_{song_segment_id}
     _, _, songid, song_segment_id = row["segment_id"].split("_")
@@ -28,30 +41,26 @@ for row in combined:
                 song_segment_id == "001"
             ), f"prev_songid: {prev_songid}, songid: {songid}, song_segment_id: {song_segment_id}"
         song2note_lengths[f"kising_{songid}"] = [row["note_midi_length"]]
+        song2word_lengths[f"kising_{songid}"] = [row["lyric_word_length"]]
     else:
         assert (
             int(song_segment_id) >= int(prev_song_segment_id) + 1
         ), f"prev_song_segment_id: {prev_song_segment_id}, song_segment_id: {song_segment_id}"
         song2note_lengths[f"kising_{songid}"].append(row["note_midi_length"])
+        song2word_lengths[f"kising_{songid}"].append(row["lyric_word_length"])
     prev_songid = songid
     prev_song_segment_id = song_segment_id
 
 # 6. write to json
 import json
 
-with open("song2note_lengths.json", "w") as f:
+with open("data/song2note_lengths.json", "w") as f:
     json.dump(song2note_lengths, f, indent=4)
 
-# 7. convert to pandas DataFrame
-import pandas as pd
+with open("data/song2word_lengths.json", "w") as f:
+    json.dump(song2word_lengths, f, indent=4)
 
-df = pd.DataFrame.from_dict(combined)
-df = df.drop(columns=["audio", "singer"])
-df["segment_id"] = df["segment_id"].str.replace("kising_barber_", "kising_")
-# export to csv
-df.to_csv("song_db.csv", index=False)
-
-# 8. push score segments to hub
+# 7. push score segments to hub
 # remove audio and singer columns
 combined = combined.remove_columns(["audio", "singer"])
 # replace kising_barber_ with kising_

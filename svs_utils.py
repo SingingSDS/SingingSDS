@@ -310,14 +310,17 @@ def song_segment_iterator(song_db, metadata):
         raise NotImplementedError(f"song name {song_name} not supported")
 
 
-def load_song_database():
+def load_song_database(config):
     song_db = load_dataset(
         "jhansss/kising_score_segments", cache_dir="cache", split="train"
     ).to_pandas()
     song_db.set_index("segment_id", inplace=True)
-
-    with open("data/song2note_lengths.json", "r") as f:
-        song2note_lengths = json.load(f)
+    if ".take_lyric_continuation" in config.melody_source:
+        with open("data/song2word_lengths.json", "r") as f:
+            song2note_lengths = json.load(f)
+    else:
+        with open("data/song2note_lengths.json", "r") as f:
+            song2note_lengths = json.load(f)
     return song2note_lengths, song_db
 
 
@@ -342,7 +345,7 @@ if __name__ == "__main__":
     if config.melody_source.startswith("random_select"):
         # load song database: jhansss/kising_score_segments
         from datasets import load_dataset
-        song2note_lengths, song_db = load_song_database()
+        song2note_lengths, song_db = load_song_database(config)
 
         # get song_name and phrase_length
         phrase_length, metadata = estimate_sentence_length(None, config, song2note_lengths)
