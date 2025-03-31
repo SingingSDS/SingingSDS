@@ -15,7 +15,7 @@ def preprocess_input(src_str, seg_syb=" "):
 
 
 def postprocess_phn(phns, model_name, lang):
-    if "Chinese" in model_name:
+    if model_name == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
         return phns
     return [phn + "@" + lang for phn in phns]
 

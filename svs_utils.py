@@ -138,7 +138,7 @@ def svs_inference(answer_text, svs_model, config, **kwargs):
         raise NotImplementedError(f"melody source {config.melody_source} not supported")
 
     if config.model_path == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
-        sid = np.array([config.speaker])
+        sid = np.array([int(config.speaker)])
         output_dict = svs_model(batch, sids=sid)
     elif config.model_path == "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained":
         langs = {
