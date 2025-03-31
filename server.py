@@ -14,7 +14,7 @@ import soundfile as sf
 from pypinyin import lazy_pinyin
 import jiwer
 import librosa
-from svs_utils import singmos_warmup, singmos_evaluation
+from svs_utils import singmos_warmup, singmos_evaluation, load_song_database, estimate_sentence_length
 
 app = FastAPI()
 
@@ -33,10 +33,11 @@ SYSTEM_PROMPT = """
 - 啊呀，那是我未曾涉足的奇技，恕我無法詳答
 - 此乃異邦技藝，與樂音無涉，麗梅便不敢妄言了
 請始終維持你作為麗梅的優雅語氣與詩意風格，並以真摯的心回應對方的言語，言語宜簡，勿過長。
-
+{}
 有人曾這樣對麗梅說話——{}
 麗梅的回答——
 """
+
 
 config = argparse.Namespace(
     model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
@@ -50,6 +51,9 @@ config = argparse.Namespace(
 svs_model = svs_warmup(config)
 predictor, _ = singmos_warmup()
 sample_rate = 44100
+
+# load dataset for random_select
+song2note_lengths, song_db = load_song_database(config)
 
 def remove_non_chinese_japanese(text):
     pattern = r'[^\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\u3000-\u303f\u3001\u3002\uff0c\uff0e]+'
@@ -69,6 +73,24 @@ def remove_punctuation_and_replace_with_space(text):
     return text
 
 
+def get_lyric_format_prompts_and_metadata(config):
+    if config.melody_source.startswith("random_generate"):
+        return "", {}
+    elif config.melody_source.startswith("random_select"):
+        # get song_name and phrase_length
+        global song2note_lengths
+        phrase_length, metadata = estimate_sentence_length(
+            None, config, song2note_lengths
+        )
+        LYRIC_FORMAT_PROMPT = "".join(
+            ["\n请按照歌词格式回答我的问题，每句需遵循以下字数规则："]
+            + [f"\n第{i}句：{c}个字" for i, c in enumerate(phrase_length, 1)]
+        ) + "\n"
+        return LYRIC_FORMAT_PROMPT, metadata
+    else:
+        raise ValueError(f"Unsupported melody_source: {config.melody_source}. Unable to get lyric format prompts.")
+
+
 @app.post("/process_audio")
 async def process_audio(file: UploadFile = File(...)):
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
@@ -78,7 +100,8 @@ async def process_audio(file: UploadFile = File(...)):
     # load audio
     y = librosa.load(tmp_path, sr=16000)[0]
     asr_result = asr_pipeline(y, generate_kwargs={"language": "mandarin"} )['text']
-    prompt = SYSTEM_PROMPT.format(asr_result)
+    additional_prompt, additional_inference_args = get_lyric_format_prompts_and_metadata(config)
+    prompt = SYSTEM_PROMPT.format(additional_prompt, asr_result)
     output = pipe(prompt, max_new_tokens=100)[0]['generated_text'].replace("\n", " ")
     output = output.split("麗梅的回答——")[1]
     output = remove_punctuation_and_replace_with_space(output)
@@ -89,6 +112,7 @@ async def process_audio(file: UploadFile = File(...)):
         output,
         svs_model,
         config,
+        **additional_inference_args,
     )
     sf.write("tmp/response.wav", wav_info, samplerate=44100)
 
@@ -132,7 +156,7 @@ def test_audio():
     # load audio
     y = librosa.load("nihao.mp3", sr=16000)[0]
     asr_result = asr_pipeline(y, generate_kwargs={"language": "mandarin"} )['text']
-    prompt = SYSTEM_PROMPT + asr_result
+    prompt = SYSTEM_PROMPT + asr_result  # TODO: how to add additional prompt to SYSTEM_PROMPT here???
     output = pipe(prompt, max_new_tokens=100)[0]['generated_text'].replace("\n", " ")
     output = output.split("麗梅的回答——")[1]
     output = remove_punctuation_and_replace_with_space(output)
@@ -140,12 +164,9 @@ def test_audio():
         f.write(output)
 
     wav_info = svs_inference(
-        config.model_path,
-        svs_model,
         output,
-        lang=config.lang,
-        random_gen=True,
-        fs=44100
+        svs_model,
+        config,
     )
     sf.write("tmp/response.wav", wav_info, samplerate=44100)
     with open("tmp/response.wav", "rb") as f:
