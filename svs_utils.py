@@ -298,7 +298,6 @@ if __name__ == "__main__":
         phrase_length, metadata = estimate_sentence_length(
             None, config, song2note_lengths
         )
-        phrase_length, metadata = estimate_sentence_length(None, config, song2note_lengths)
 
         # then, phrase_length info should be added to llm prompt, and get the answer lyrics from llm
         # e.g. answer_text = "天气真好\n空气清新"
