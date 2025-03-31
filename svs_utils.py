@@ -279,14 +279,20 @@ if __name__ == "__main__":
         cache_dir="cache",
         device="cuda", # "cpu"
         melody_source="random_generate", # "random_select.take_lyric_continuation"
-        lang="zh",
+        lang="jp",
         speaker="resource/singer/singer_embedding_ace-2.npy",
     )
 
     # load model
     model = svs_warmup(config)
 
-    answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
+    if config.lang=="zh":
+        answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
+    elif config.lang=="jp":
+        answer_text = "せ か い で い ち ば ん お ひ め さ ま\nそ う い う あ つ か い\nこ こ ろ え て よ ね" # 
+    else:
+        print(f'Currently system does not support {config.lang}')
+        exit(1)
 
     sample_rate = 44100
 
@@ -300,7 +306,6 @@ if __name__ == "__main__":
         )
 
         # then, phrase_length info should be added to llm prompt, and get the answer lyrics from llm
-        # e.g. answer_text = "天气真好\n空气清新"
         additional_kwargs = {"song_db": song_db, "metadata": metadata}
     else:
         additional_kwargs = {}
@@ -309,4 +314,4 @@ if __name__ == "__main__":
 
     # write wav to output_retrieved.wav
     save_name = config.melody_source
-    sf.write(f"{save_name}.wav", wav_info, samplerate=sample_rate)
+    sf.write(f"{save_name}_{config.lang}.wav", wav_info, samplerate=sample_rate)
