@@ -55,6 +55,7 @@ sample_rate = 44100
 # load dataset for random_select
 song2note_lengths, song_db = load_song_database(config)
 
+
 def remove_non_chinese_japanese(text):
     pattern = r'[^\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\u3000-\u303f\u3001\u3002\uff0c\uff0e]+'
     cleaned = re.sub(pattern, '', text)
@@ -82,11 +83,12 @@ def get_lyric_format_prompts_and_metadata(config):
         phrase_length, metadata = estimate_sentence_length(
             None, config, song2note_lengths
         )
-        LYRIC_FORMAT_PROMPT = "".join(
-            ["\n请按照歌词格式回答我的问题，每句需遵循以下字数规则："]
-            + [f"\n第{i}句：{c}个字" for i, c in enumerate(phrase_length, 1)]
-        ) + "\n"
-        return LYRIC_FORMAT_PROMPT, metadata
+        lyric_format_prompt = (
+            "\n请按照歌词格式回答我的问题，每句需遵循以下字数规则："
+            + "".join(+[f"\n第{i}句：{c}个字" for i, c in enumerate(phrase_length, 1)])
+            + "\n如果没有足够的信息回答，请使用最少的句子，不要重复、不要扩展、不要加入无关内容。\n"
+        )
+        return lyric_format_prompt, metadata
     else:
         raise ValueError(f"Unsupported melody_source: {config.melody_source}. Unable to get lyric format prompts.")
 
