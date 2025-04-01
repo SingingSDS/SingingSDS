@@ -24,6 +24,8 @@ def pyopenjtalk_g2p(text) -> List[str]:
     import pyopenjtalk
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
+        # add space between each character
+        text = " ".join(list(text))
         # phones is a str object separated by space
         phones = pyopenjtalk.g2p(text, kana=False)
         if len(w) > 0:

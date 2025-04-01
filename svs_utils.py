@@ -52,8 +52,8 @@ def svs_text_preprocessor(model_path, texts, lang):
         texts = preprocess_input(texts, "")
         text_list = get_pinyin(texts)
     elif lang == "jp":
-        texts = preprocess_input(texts, " ")
-        text_list = texts.strip().split()
+        texts = preprocess_input(texts, "")
+        text_list = list(texts)
 
     # text to phoneme
     tokenizer = get_tokenizer(model_path, lang)
@@ -286,12 +286,12 @@ if __name__ == "__main__":
     # load model
     model = svs_warmup(config)
 
-    if config.lang=="zh":
+    if config.lang == "zh":
         answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
-    elif config.lang=="jp":
-        answer_text = "せ か い で い ち ば ん お ひ め さ ま\nそ う い う あ つ か い\nこ こ ろ え て よ ね" # 
+    elif config.lang == "jp":
+        answer_text = "せかいでいちばんおひめさま\nそういうあつかい\nこころえてよね"
     else:
-        print(f'Currently system does not support {config.lang}')
+        print(f"Currently system does not support {config.lang}")
         exit(1)
 
     sample_rate = 44100
