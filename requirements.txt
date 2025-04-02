@@ -7,3 +7,5 @@ typeguard==4.4.0
 jiwer
 fastapi
 uvicorn
+fugashi
+pykakasi

@@ -9,6 +9,10 @@ from espnet_model_zoo.downloader import ModelDownloader
 
 from util import get_pinyin, get_tokenizer, postprocess_phn, preprocess_input
 
+import fugashi
+import unicodedata
+import pykakasi
+
 
 def svs_warmup(config):
     """
@@ -27,6 +31,83 @@ def svs_warmup(config):
     else:
         raise NotImplementedError(f"Model {config.model_path} not supported")
     return model
+
+
+yoon_map = {
+    "ぁ": "あ", "ぃ": "い", "ぅ": "う", "ぇ": "え", "ぉ": "お",
+    "ゃ": "や", "ゅ": "ゆ", "ょ": "よ", "ゎ": "わ"
+}
+
+def replace_chouonpu(hiragana_text):
+    """ process「ー」since the previous packages didn't support """
+    vowels = {
+        "あ": "あ", "い": "い", "う": "う", "え": "え", "お": "う",
+        "か": "あ", "き": "い", "く": "う", "け": "え", "こ": "う",
+        "さ": "あ", "し": "い", "す": "う", "せ": "え", "そ": "う",
+        "た": "あ", "ち": "い", "つ": "う", "て": "え", "と": "う",
+        "な": "あ", "に": "い", "ぬ": "う", "ね": "え", "の": "う",
+        "は": "あ", "ひ": "い", "ふ": "う", "へ": "え", "ほ": "う",
+        "ま": "あ", "み": "い", "む": "う", "め": "え", "も": "う",
+        "や": "あ", "ゆ": "う", "よ": "う",
+        "ら": "あ", "り": "い", "る": "う", "れ": "え", "ろ": "う",
+        "わ": "あ", "を": "う",
+    }
+
+    new_text = []
+    for i, char in enumerate(hiragana_text):
+        if char == "ー" and i > 0:
+            prev_char = new_text[-1]
+            if prev_char in yoon_map:
+                prev_char = yoon_map[prev_char] 
+            new_text.append(vowels.get(prev_char, prev_char)) 
+        else:
+            new_text.append(char) 
+    return "".join(new_text)
+
+
+def is_small_kana(kana): # ょ True よ False
+    for char in kana:
+        name = unicodedata.name(char, "")
+        if "SMALL" in name:
+            return True  
+    return False 
+
+
+def kanji_to_SVSDictKana(text):
+    tagger = fugashi.Tagger()
+
+    katagana_text = " ".join(word.feature.pron if word.feature.pron else word.surface for word in tagger(text))
+    print(katagana_text)  # ['トーキョー', 'ダイガク', 'ト', 'キョート', 'ダイガク'] # NOTE(yiwen) the svs predefined dict does not support ー
+
+    kks = pykakasi.kakasi()
+    kks.setMode("K", "H")  # 片仮名 → 平仮名
+    conv = kks.getConverter()
+
+    hiragana_text = " ".join(
+        conv.do(word.feature.pron) if word.feature.pron else word.surface
+        for word in tagger(katagana_text)
+    )
+
+    hiragana_text_wl = replace_chouonpu(hiragana_text).split(" ") # list
+    # print(f'debug -- hiragana_text {hiragana_text_wl}')  
+
+    final_ls = []
+    for subword in hiragana_text_wl:
+        sl_prev = 0
+        for i in range(len(subword)-1):
+            if sl_prev>=len(subword)-1:
+                break
+            sl = sl_prev + 1
+            if subword[sl] in yoon_map:
+                final_ls.append(subword[sl_prev:sl+1])
+                sl_prev+=2
+            else:
+                final_ls.append(subword[sl_prev])
+                sl_prev+=1
+        final_ls.append(subword[sl_prev])
+
+    # final_str = " ".join(final_ls)
+    return final_ls
 
 
 def svs_text_preprocessor(model_path, texts, lang):
@@ -52,8 +133,9 @@ def svs_text_preprocessor(model_path, texts, lang):
         texts = preprocess_input(texts, "")
         text_list = get_pinyin(texts)
     elif lang == "jp":
-        texts = preprocess_input(texts, "")
-        text_list = list(texts)
+        text_list = kanji_to_SVSDictKana(texts)
+        # texts = preprocess_input(texts, "")
+        # text_list = list(texts)
 
     # text to phoneme
     tokenizer = get_tokenizer(model_path, lang)
@@ -289,7 +371,7 @@ if __name__ == "__main__":
     if config.lang == "zh":
         answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
     elif config.lang == "jp":
-        answer_text = "せかいでいちばんおひめさま\nそういうあつかい\nこころえてよね"
+        answer_text = "世界で一番おひめさま そういう扱い心得てよね\n私を誰だと思ってるの"
     else:
         print(f"Currently system does not support {config.lang}")
         exit(1)
