@@ -9,9 +9,11 @@ from espnet_model_zoo.downloader import ModelDownloader
 
 from util import get_pinyin, get_tokenizer, postprocess_phn, preprocess_input
 
-import fugashi
+from kanjiconv import KanjiConv
 import unicodedata
-import pykakasi
+
+
+kanji_to_kana = KanjiConv()
 
 
 def svs_warmup(config):
@@ -74,22 +76,10 @@ def is_small_kana(kana): # ょ True よ False
 
 
 def kanji_to_SVSDictKana(text):
-    tagger = fugashi.Tagger()
-
-    katagana_text = " ".join(word.feature.pron if word.feature.pron else word.surface for word in tagger(text))
-    print(katagana_text)  # ['トーキョー', 'ダイガク', 'ト', 'キョート', 'ダイガク'] # NOTE(yiwen) the svs predefined dict does not support ー
-
-    kks = pykakasi.kakasi()
-    kks.setMode("K", "H")  # 片仮名 → 平仮名
-    conv = kks.getConverter()
-
-    hiragana_text = " ".join(
-        conv.do(word.feature.pron) if word.feature.pron else word.surface
-        for word in tagger(katagana_text)
-    )
+    hiragana_text = kanji_to_kana.to_hiragana(text.replace(" ", ""))
 
     hiragana_text_wl = replace_chouonpu(hiragana_text).split(" ") # list
-    # print(f'debug -- hiragana_text {hiragana_text_wl}')  
+    # print(f'debug -- hiragana_text {hiragana_text_wl}') 
 
     final_ls = []
     for subword in hiragana_text_wl:
@@ -253,6 +243,11 @@ def singmos_evaluation(predictor, wav_info, fs):
 
 
 def estimate_sentence_length(query, config, song2note_lengths):
+    if config.melody_source == "random_select.touhou":
+        song_name = "touhou"
+        phrase_length = None
+        metadata = {"song_name": song_name}
+        return phrase_length, metadata
     if config.melody_source.startswith("random_select"):
         song_name = random.choice(list(song2note_lengths.keys()))
         phrase_length = song2note_lengths[song_name]
@@ -323,6 +318,25 @@ def align_score_and_text(segment_iterator, lyric_ls, sybs, labels, config):
     return batch
 
 
+def load_list_from_json(json_path):
+    with open(json_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    data = [
+        {
+            "tempo": d["tempo"],
+            "note_start_times": [n[0] * (145/d["tempo"]) for n in d["score"]],
+            "note_end_times": [n[1] * (145/d["tempo"]) for n in d["score"]],
+            "note_lyrics": ["" for n in d["score"]],
+            "note_midi": [n[2] for n in d["score"]],
+        }
+        for d in data
+    ]
+    if isinstance(data, list):
+        return data
+    else:
+        raise ValueError("The contents of the json is not list.")
+
+
 def song_segment_iterator(song_db, metadata):
     song_name = metadata["song_name"]
     if song_name.startswith("kising_"):
@@ -331,6 +345,11 @@ def song_segment_iterator(song_db, metadata):
         while f"{song_name}_{segment_id:03d}" in song_db.index:
             yield song_db.loc[f"{song_name}_{segment_id:03d}"]
             segment_id += 1
+    elif song_name.startswith("touhou"):
+        # return a iterator that load from touhou musics
+        data = load_list_from_json("data/touhou/note_data.json")
+        for d in data:
+            yield d
     else:
         raise NotImplementedError(f"song name {song_name} not supported")
 
@@ -360,7 +379,7 @@ if __name__ == "__main__":
         model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
         cache_dir="cache",
         device="cuda", # "cpu"
-        melody_source="random_generate", # "random_select.take_lyric_continuation"
+        melody_source="random_select.touhou", #"random_generate" "random_select.take_lyric_continuation",  "random_select.touhou"
         lang="jp",
         speaker="resource/singer/singer_embedding_ace-2.npy",
     )
@@ -371,7 +390,7 @@ if __name__ == "__main__":
     if config.lang == "zh":
         answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
     elif config.lang == "jp":
-        answer_text = "世界で一番おひめさま そういう扱い心得てよね\n私を誰だと思ってるの"
+        answer_text = "世界で一番おひめさま そういう扱い心得てよね"
     else:
         print(f"Currently system does not support {config.lang}")
         exit(1)
