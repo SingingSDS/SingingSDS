@@ -43,7 +43,7 @@ def chroma_entropy_evaluation(y, fs):
     chroma_sum = np.clip(chroma_sum, 1e-6, None)
     chroma_norm = chroma / chroma_sum
     chroma_norm = np.clip(chroma_norm, 1e-6, 1.0)
-    entropy = np.sum(chroma_norm * np.log2(chroma_norm), axis=0)
+    entropy = -np.sum(chroma_norm * np.log2(chroma_norm), axis=0)
     return np.mean(entropy)
 
 
