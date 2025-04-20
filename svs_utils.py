@@ -1,9 +1,7 @@
 import json
 import random
 
-import librosa
 import numpy as np
-import torch
 from espnet2.bin.svs_inference import SingingGenerate
 from espnet_model_zoo.downloader import ModelDownloader
 
@@ -225,21 +223,6 @@ def svs_inference(answer_text, svs_model, config, **kwargs):
         raise NotImplementedError(f"Model {config.model_path} not supported")
     wav_info = output_dict["wav"].cpu().numpy()
     return wav_info
-
-
-def singmos_warmup():
-    predictor = torch.hub.load(
-        "South-Twilight/SingMOS:v0.2.0", "singing_ssl_mos", trust_repo=True
-    )
-    return predictor, "South-Twilight/SingMOS:v0.2.0"
-
-
-def singmos_evaluation(predictor, wav_info, fs):
-    wav_mos = librosa.resample(wav_info, orig_sr=fs, target_sr=16000)
-    wav_mos = torch.from_numpy(wav_mos).unsqueeze(0)
-    len_mos = torch.tensor([wav_mos.shape[1]])
-    score = predictor(wav_mos, len_mos)
-    return score
 
 
 def estimate_sentence_length(query, config, song2note_lengths):
