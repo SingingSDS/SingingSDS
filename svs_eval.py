@@ -1,5 +1,4 @@
 import librosa
-import pyworld as pw
 import numpy as np
 import torch
 
@@ -19,32 +18,36 @@ def singmos_evaluation(predictor, wav_info, fs):
     return score
 
 
-def pitch_interval_evaluation(y, fs):
-    _f0, t = pw.dio(y.astype(np.float64), fs)
-    f0 = pw.stonemask(y.astype(np.float64), _f0, t, fs)
+def score_extract_warmpup():
+    from basic_pitch.inference import predict
 
-    f0[f0 == 0] = np.nan
-    midi_f0 = librosa.hz_to_midi(f0)
-
-    if len(midi_f0) < 2:
-        return np.nan, np.nan
-
-    # only consider the intervals between notes
-    intervals = np.diff(midi_f0)
-    intervals = intervals[~np.isnan(intervals)]
-    interval_mean = np.mean(np.abs(intervals))
-    interval_std = np.std(intervals)
-    return interval_mean, interval_std
+    return predict
 
 
-def chroma_entropy_evaluation(y, fs):
-    chroma = librosa.feature.chroma_cqt(y=y, sr=fs)
-    chroma_sum = np.sum(chroma, axis=0, keepdims=True)
-    chroma_sum = np.clip(chroma_sum, 1e-6, None)
-    chroma_norm = chroma / chroma_sum
-    chroma_norm = np.clip(chroma_norm, 1e-6, 1.0)
-    entropy = -np.sum(chroma_norm * np.log2(chroma_norm), axis=0)
-    return np.mean(entropy)
+def score_metric_evaluation(score_extractor, audio_path):
+    model_output, midi_data, note_events = score_extractor(audio_path)
+    metrics = {}
+    assert (
+        len(midi_data.instruments) == 1
+    ), f"Detected {len(midi_data.instruments)} instruments for {audio_path}"
+    midi_notes = midi_data.instruments[0].notes
+    melody = [note.pitch for note in midi_notes]
+    if len(melody) == 0:
+        print(f"No notes detected in {audio_path}")
+        return {}
+    intervals = [abs(melody[i + 1] - melody[i]) for i in range(len(melody) - 1)]
+    metrics["pitch_range"] = max(melody) - min(melody)
+    if len(intervals) > 0:
+        metrics["interval_mean"] = np.mean(intervals)
+        metrics["interval_std"] = np.std(intervals)
+        metrics["interval_large_jump_ratio"] = np.mean([i > 5 for i in intervals])
+        metrics["dissonance_rate"] = compute_dissonance_rate(intervals)
+    return metrics
+
+
+def compute_dissonance_rate(intervals, dissonant_intervals={1, 2, 6, 10, 11}):
+    dissonant = [i % 12 in dissonant_intervals for i in intervals]
+    return np.mean(dissonant) if intervals else np.nan
 
 
 if __name__ == "__main__":
@@ -65,49 +68,38 @@ if __name__ == "__main__":
     parser.parse_args()
 
     args = parser.parse_args()
-    
+
     args.results_csv.parent.mkdir(parents=True, exist_ok=True)
 
     y, fs = librosa.load(args.wav_path, sr=None)
 
     # warmup
     predictor = singmos_warmup()
+    score_extractor = score_extract_warmpup()
+
+    # evaluate the audio
+    metrics = {}
 
     # singmos evaluation
     score = singmos_evaluation(predictor, y, fs)
-
-    # pitch interval evaluation
-    interval_mean, interval_std = pitch_interval_evaluation(y, fs)
-    # chroma entropy evaluation
-    chroma_entropy = chroma_entropy_evaluation(y, fs)
+    metrics["singmos"] = score
     
-    # # visualize
-    # import matplotlib.pyplot as plt
-    # import librosa.display
-    # chroma = librosa.feature.chroma_cqt(y=y, sr=fs)
-    # img = librosa.display.specshow(chroma, y_axis='chroma', x_axis='time')
-    # plt.colorbar(img)
-    # plt.savefig(args.results_csv.parent / args.wav_path.with_suffix('.png'))
+    # score metric evaluation
+    score_results = score_metric_evaluation(score_extractor, args.wav_path)
+    metrics.update(score_results)
 
     # save results
-    results = {
-        "singmos": score,
-        "pitch_interval_mean": interval_mean,
-        "pitch_interval_std": interval_std,
-        "chroma_entropy": chroma_entropy,
-    }
-
     with open(args.results_csv, "a") as f:
-        header = "file," + ",".join(results.keys()) + "\n"
+        header = "file," + ",".join(metrics.keys()) + "\n"
         if f.tell() == 0:
             f.write(header)
         else:
             with open(args.results_csv, "r") as f2:
                 file_header = f2.readline()
             if file_header != header:
-                raise ValueError(
-                    f"Header mismatch: {file_header} vs {header}"
-                )
+                raise ValueError(f"Header mismatch: {file_header} vs {header}")
 
-        line = ",".join([str(args.wav_path)] + [str(v) for v in results.values()]) + "\n"
+        line = (
+            ",".join([str(args.wav_path)] + [str(v) for v in metrics.values()]) + "\n"
+        )
         f.write(line)
