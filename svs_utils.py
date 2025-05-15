@@ -210,7 +210,7 @@ def svs_inference(answer_text, svs_model, config, **kwargs):
     if config.model_path == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
         sid = np.array([int(config.speaker)])
         output_dict = svs_model(batch, sids=sid)
-    elif config.model_path == "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained":
+    elif config.model_path == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
         langs = {
             "zh": 2,
             "jp": 1,
@@ -359,7 +359,7 @@ if __name__ == "__main__":
 
     # -------- demo code for generate audio from randomly selected song ---------#
     config = argparse.Namespace(
-        model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
+        model_path="espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
         cache_dir="cache",
         device="cuda", # "cpu"
         melody_source="random_select.touhou", #"random_generate" "random_select.take_lyric_continuation",  "random_select.touhou"

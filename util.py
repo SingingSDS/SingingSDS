@@ -61,7 +61,7 @@ def get_tokenizer(model, lang):
             return lambda text: split_pinyin_py(text)
         else:
             raise ValueError(f"Only support Chinese language for {model}")
-    elif model == "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained":
+    elif model == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
         if lang == "zh":
             with open(os.path.join("resource/all_plans.json"), "r") as f:
                 all_plan_dict = json.load(f)
@@ -74,7 +74,7 @@ def get_tokenizer(model, lang):
         else:
             raise ValueError(f"Only support Chinese and Japanese language for {model}")
     else:
-        raise ValueError(f"Only support espnet/aceopencpop_svs_visinger2_40singer_pretrain and espnet/mixdata_svs_visinger2_spkembed_lang_pretrained for now")
+        raise ValueError(f"Only support espnet/aceopencpop_svs_visinger2_40singer_pretrain and espnet/mixdata_svs_visinger2_spkemb_lang_pretrained for now")
 
 
 def get_pinyin(texts):

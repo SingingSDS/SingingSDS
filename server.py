@@ -39,7 +39,7 @@ SYSTEM_PROMPT = """
 
 
 config = argparse.Namespace(
-    model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
+    model_path="espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
     cache_dir="cache",
     device="cuda", # "cpu"
     melody_source="random_generate", # "random_select.take_lyric_continuation"
