@@ -86,15 +86,42 @@ def remove_punctuation_and_replace_with_space(text):
     return text
 
 
+def pypinyin_g2p_phone_without_prosody(text):
+    from pypinyin import Style, pinyin
+    from pypinyin.style._utils import get_finals, get_initials
+
+    phones = []
+    for phone in pinyin(text, style=Style.NORMAL, strict=False):
+        initial = get_initials(phone[0], strict=False)
+        final = get_finals(phone[0], strict=False)
+        if len(initial) != 0:
+            if initial in ["x", "y", "j", "q"]:
+                if final == "un":
+                    final = "vn"
+                elif final == "uan":
+                    final = "van"
+                elif final == "u":
+                    final = "v"
+            if final == "ue":
+                final = "ve"
+            phones.append(initial)
+            phones.append(final)
+        else:
+            phones.append(final)
+    return phones
+
+    
 def on_click_metrics(audio_path, ref):
     global predictor
     # OWSM ctc + PER
     y, sr = librosa.load(audio_path, sr=16000)
     asr_result = asr_pipeline(y, generate_kwargs={"language": "mandarin"} )['text']
-    hyp_pinin = lazy_pinyin(asr_result)
-
-    ref_pinin = lazy_pinyin(ref)
-    per = jiwer.wer(" ".join(ref_pinin), " ".join(hyp_pinin))
+    
+    # Espnet embeded g2p, but sometimes it will mispronunce polyphonic characters
+    hyp_pinin = pypinyin_g2p_phone_without_prosody(asr_result)
+    
+    ref_pinin = pypinyin_g2p_phone_without_prosody(ref)
+    per = jiwer.wer(ref_pinin, hyp_pinin)
     
     audio = librosa.load(audio_path, sr=22050)[0]
     singmos = singmos_evaluation(
