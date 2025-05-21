@@ -18,6 +18,17 @@ def singmos_evaluation(predictor, wav_info, fs):
     return score
 
 
+def initialize_audiobox_predictor():
+    from audiobox_aesthetics.infer import initialize_predictor
+    predictor = initialize_predictor()
+    return predictor
+
+
+def audiobox_aesthetics_evaluation(predictor, audio_path):
+    score = predictor.forward([{"path": str(audio_path)}])
+    return score
+
+
 def score_extract_warmpup():
     from basic_pitch.inference import predict
 
@@ -76,6 +87,7 @@ if __name__ == "__main__":
     # warmup
     predictor = singmos_warmup()
     score_extractor = score_extract_warmpup()
+    aesthetic_predictor = initialize_audiobox_predictor()
 
     # evaluate the audio
     metrics = {}
@@ -87,6 +99,10 @@ if __name__ == "__main__":
     # score metric evaluation
     score_results = score_metric_evaluation(score_extractor, args.wav_path)
     metrics.update(score_results)
+    
+    # audiobox aesthetics evaluation
+    score_results = audiobox_aesthetics_evaluation(aesthetic_predictor, args.wav_path)
+    metrics.update(score_results[0])
 
     # save results
     with open(args.results_csv, "a") as f:

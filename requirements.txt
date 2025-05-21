@@ -1,4 +1,4 @@
-git+https://github.com/South-Twilight/espnet==202402
+git+https://github.com/espnet/espnet
 espnet_model_zoo
 # pyopenjtalk
 datasets
@@ -9,3 +9,6 @@ fastapi
 uvicorn
 fugashi
 pykakasi
+basic-pitch[onnx]
+audiobox_aesthetics
+git+https://github.com/sea-turt1e/kanjiconv
