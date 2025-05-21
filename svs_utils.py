@@ -307,8 +307,8 @@ def load_list_from_json(json_path):
     data = [
         {
             "tempo": d["tempo"],
-            "note_start_times": [n[0] * (145/d["tempo"]) for n in d["score"]],
-            "note_end_times": [n[1] * (145/d["tempo"]) for n in d["score"]],
+            "note_start_times": [n[0] * (100/d["tempo"]) for n in d["score"]],
+            "note_end_times": [n[1] * (100/d["tempo"]) for n in d["score"]],
             "note_lyrics": ["" for n in d["score"]],
             "note_midi": [n[2] for n in d["score"]],
         }
@@ -331,8 +331,8 @@ def song_segment_iterator(song_db, metadata):
     elif song_name.startswith("touhou"):
         # return a iterator that load from touhou musics
         data = load_list_from_json("data/touhou/note_data.json")
-        for d in data:
-            yield d
+        while True:
+            yield random.choice(data)
     else:
         raise NotImplementedError(f"song name {song_name} not supported")
 
@@ -363,7 +363,7 @@ if __name__ == "__main__":
         cache_dir="cache",
         device="cuda", # "cpu"
         melody_source="random_select.touhou", #"random_generate" "random_select.take_lyric_continuation",  "random_select.touhou"
-        lang="jp",
+        lang="zh",
         speaker="resource/singer/singer_embedding_ace-2.npy",
     )
 
@@ -373,7 +373,7 @@ if __name__ == "__main__":
     if config.lang == "zh":
         answer_text = "天气真好\n空气清新\n气温温和\n风和日丽\n天高气爽\n阳光明媚"
     elif config.lang == "jp":
-        answer_text = "世界で一番おひめさま そういう扱い心得てよね"
+        answer_text = "流れてく時の中ででもけだるさが"
     else:
         print(f"Currently system does not support {config.lang}")
         exit(1)

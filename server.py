@@ -1,5 +1,3 @@
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import FileResponse, JSONResponse
 import base64
 import argparse
 import librosa
@@ -15,7 +13,6 @@ import librosa
 from svs_utils import load_song_database, estimate_sentence_length
 from svs_eval import singmos_warmup, singmos_evaluation
 
-app = FastAPI()
 
 asr_pipeline = pipeline(
     "automatic-speech-recognition",
@@ -42,8 +39,9 @@ config = argparse.Namespace(
     model_path="espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
     cache_dir="cache",
     device="cuda", # "cpu"
-    melody_source="random_generate", # "random_select.take_lyric_continuation"
+    melody_source="random_select.touhou", # "random_select.take_lyric_continuation"
     lang="zh",
+    speaker="resource/singer/singer_embedding_ace-2.npy",
 )
 
 # load model
@@ -70,33 +68,40 @@ def remove_punctuation_and_replace_with_space(text):
     text = re.sub(r'[A-Za-z0-9]', ' ', text)
     text = re.sub(r'[^\w\s\u4e00-\u9fff]', ' ', text)
     text = re.sub(r'\s+', ' ', text)
+    text = " ".join(text.split()[:2])
     return text
 
 
 def get_lyric_format_prompts_and_metadata(config):
+    global song2note_lengths
     if config.melody_source.startswith("random_generate"):
         return "", {}
+    elif config.melody_source.startswith("random_select.touhou"):
+        phrase_length, metadata = estimate_sentence_length(
+            None, config, song2note_lengths
+        )
+        additional_kwargs = {"song_db": song_db, "metadata": metadata}
+        return "", additional_kwargs
     elif config.melody_source.startswith("random_select"):
         # get song_name and phrase_length
-        global song2note_lengths
         phrase_length, metadata = estimate_sentence_length(
             None, config, song2note_lengths
         )
         lyric_format_prompt = (
             "\n请按照歌词格式回答我的问题，每句需遵循以下字数规则："
-            + "".join(+[f"\n第{i}句：{c}个字" for i, c in enumerate(phrase_length, 1)])
+            + "".join([f"\n第{i}句：{c}个字" for i, c in enumerate(phrase_length, 1)])
             + "\n如果没有足够的信息回答，请使用最少的句子，不要重复、不要扩展、不要加入无关内容。\n"
         )
-        return lyric_format_prompt, metadata
+        additional_kwargs = {"song_db": song_db, "metadata": metadata}
+        return lyric_format_prompt, additional_kwargs
     else:
         raise ValueError(f"Unsupported melody_source: {config.melody_source}. Unable to get lyric format prompts.")
 
 
-@app.post("/process_audio")
-async def process_audio(file: UploadFile = File(...)):
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
-        tmp.write(await file.read())
-        tmp_path = tmp.name
+def process_audio(tmp_path):
+    # with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp:
+    #     tmp.write(await file.read())
+    #     tmp_path = tmp.name
 
     # load audio
     y = librosa.load(tmp_path, sr=16000)[0]
@@ -115,20 +120,24 @@ async def process_audio(file: UploadFile = File(...)):
         config,
         **additional_inference_args,
     )
-    sf.write("tmp/response.wav", wav_info, samplerate=44100)
+    sf.write("tmp/response.wav", wav_info, samplerate=sample_rate)
 
     with open("tmp/response.wav", "rb") as f:
         audio_bytes = f.read()
         audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
 
-    return JSONResponse(content={
+    return {
         "asr_text": asr_result,
         "llm_text": output,
         "audio": audio_b64
-    })
+    }
+    # return JSONResponse(content={
+    #     "asr_text": asr_result,
+    #     "llm_text": output,
+    #     "audio": audio_b64
+    # })
 
 
-@app.get("/metrics")
 def on_click_metrics():
     global predictor
     # OWSM ctc + PER
@@ -142,11 +151,11 @@ def on_click_metrics():
     ref_pinin = lazy_pinyin(ref)
     per = jiwer.wer(" ".join(ref_pinin), " ".join(hyp_pinin))
     
-    audio = librosa.load(f"tmp/response.wav", sr=44100)[0]
+    audio = librosa.load(f"tmp/response.wav", sr=sample_rate)[0]
     singmos = singmos_evaluation(
         predictor, 
         audio,
-        fs=44100
+        fs=sample_rate
     )
     return f"""
 Phoneme Error Rate: {per}
@@ -169,7 +178,7 @@ def test_audio():
         svs_model,
         config,
     )
-    sf.write("tmp/response.wav", wav_info, samplerate=44100)
+    sf.write("tmp/response.wav", wav_info, samplerate=sample_rate)
     with open("tmp/response.wav", "rb") as f:
         audio_bytes = f.read()
         audio_b64 = base64.b64encode(audio_bytes).decode("utf-8")
