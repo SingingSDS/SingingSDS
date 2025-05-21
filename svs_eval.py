@@ -76,7 +76,6 @@ if __name__ == "__main__":
         type=Path,
         help="csv file to save the results",
     )
-    parser.parse_args()
 
     args = parser.parse_args()
 
