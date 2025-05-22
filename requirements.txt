@@ -11,4 +11,6 @@ fugashi
 pykakasi
 basic-pitch[onnx]
 audiobox_aesthetics
+transformers
+s3prl
 git+https://github.com/sea-turt1e/kanjiconv

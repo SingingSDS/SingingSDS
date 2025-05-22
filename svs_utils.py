@@ -28,6 +28,21 @@ def svs_warmup(config):
             model_file=downloaded["model_file"],
             device=config.device,
         )
+        dummy_batch = {
+            "score": (
+                75,  # tempo
+                [
+                    (0.0, 0.25, "r_en", 63.0, "r_en"),
+                    (0.25, 0.5, "—", 63.0, "en"),
+                ],
+            ),
+            "text": "r en en",
+        }
+        model(
+            dummy_batch,
+            lids=np.array([2]),
+            spembs=np.load("resource/singer/singer_embedding_ace-2.npy"),
+        )  # warmup
     else:
         raise NotImplementedError(f"Model {config.model_path} not supported")
     return model
