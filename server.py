@@ -1,9 +1,7 @@
 import base64
 import argparse
 import librosa
-import torch
 import tempfile
-import os
 from transformers import pipeline
 import re
 from svs_utils import svs_warmup, svs_inference
@@ -12,7 +10,8 @@ import soundfile as sf
 from pypinyin import lazy_pinyin
 import jiwer
 import librosa
-from svs_utils import singmos_warmup, singmos_evaluation, load_song_database, estimate_sentence_length
+from svs_utils import load_song_database, estimate_sentence_length
+from svs_eval import singmos_warmup, singmos_evaluation
 
 
 asr_pipeline = pipeline(
@@ -37,7 +36,7 @@ SYSTEM_PROMPT = """
 
 
 config = argparse.Namespace(
-    model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
+    model_path="espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
     cache_dir="cache",
     device="cuda", # "cpu"
     melody_source="random_select.touhou", # "random_select.take_lyric_continuation"
@@ -47,8 +46,8 @@ config = argparse.Namespace(
 
 # load model
 svs_model = svs_warmup(config)
-predictor, _ = singmos_warmup()
-sample_rate = 48000
+predictor = singmos_warmup()
+sample_rate = 44100
 
 # load dataset for random_select
 song2note_lengths, song_db = load_song_database(config)

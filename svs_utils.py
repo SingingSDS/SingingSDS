@@ -1,9 +1,7 @@
 import json
 import random
 
-import librosa
 import numpy as np
-import torch
 from espnet2.bin.svs_inference import SingingGenerate
 from espnet_model_zoo.downloader import ModelDownloader
 
@@ -30,6 +28,21 @@ def svs_warmup(config):
             model_file=downloaded["model_file"],
             device=config.device,
         )
+        dummy_batch = {
+            "score": (
+                75,  # tempo
+                [
+                    (0.0, 0.25, "r_en", 63.0, "r_en"),
+                    (0.25, 0.5, "—", 63.0, "en"),
+                ],
+            ),
+            "text": "r en en",
+        }
+        model(
+            dummy_batch,
+            lids=np.array([2]),
+            spembs=np.load("resource/singer/singer_embedding_ace-2.npy"),
+        )  # warmup
     else:
         raise NotImplementedError(f"Model {config.model_path} not supported")
     return model
@@ -212,7 +225,7 @@ def svs_inference(answer_text, svs_model, config, **kwargs):
     if config.model_path == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
         sid = np.array([int(config.speaker)])
         output_dict = svs_model(batch, sids=sid)
-    elif config.model_path == "espnet/mixdata_svs_visinger2_spkembed_lang_pretrained":
+    elif config.model_path == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
         langs = {
             "zh": 2,
             "jp": 1,
@@ -225,21 +238,6 @@ def svs_inference(answer_text, svs_model, config, **kwargs):
         raise NotImplementedError(f"Model {config.model_path} not supported")
     wav_info = output_dict["wav"].cpu().numpy()
     return wav_info
-
-
-def singmos_warmup():
-    predictor = torch.hub.load(
-        "South-Twilight/SingMOS:v0.2.0", "singing_ssl_mos", trust_repo=True
-    )
-    return predictor, "South-Twilight/SingMOS:v0.2.0"
-
-
-def singmos_evaluation(predictor, wav_info, fs):
-    wav_mos = librosa.resample(wav_info, orig_sr=fs, target_sr=16000)
-    wav_mos = torch.from_numpy(wav_mos).unsqueeze(0)
-    len_mos = torch.tensor([wav_mos.shape[1]])
-    score = predictor(wav_mos, len_mos)
-    return score
 
 
 def estimate_sentence_length(query, config, song2note_lengths):
@@ -376,7 +374,7 @@ if __name__ == "__main__":
 
     # -------- demo code for generate audio from randomly selected song ---------#
     config = argparse.Namespace(
-        model_path="espnet/mixdata_svs_visinger2_spkembed_lang_pretrained",
+        model_path="espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
         cache_dir="cache",
         device="cuda", # "cpu"
         melody_source="random_select.touhou", #"random_generate" "random_select.take_lyric_continuation",  "random_select.touhou"
