@@ -5,7 +5,8 @@ from typing import List
 import re
 
 from resource.pinyin_dict import PINYIN_DICT
-from pypinyin import lazy_pinyin
+from pypinyin import pinyin, Style
+from zhconv import convert
 
 
 def preprocess_input(src_str, seg_syb=" "):
@@ -77,14 +78,33 @@ def get_tokenizer(model, lang):
         raise ValueError(f"Only support espnet/aceopencpop_svs_visinger2_40singer_pretrain and espnet/mixdata_svs_visinger2_spkemb_lang_pretrained for now")
 
 
+def is_chinese(char):
+    return '\u4e00' <= char <= '\u9fff'
+
+
+def is_special(char):
+    return re.match(r'^[-——APSP]+$', char) is not None
+
+
 def get_pinyin(texts):
-    pinyin_list = lazy_pinyin(texts)
+    texts = preprocess_input(texts, seg_syb="")
+    pattern = re.compile(r'[\u4e00-\u9fff]|[^\u4e00-\u9fff]+')
+    blocks = pattern.findall(texts) 
+
+    characters = [block for block in blocks if is_chinese(block)] 
+    chinese_text = ''.join(characters)
+    chinese_text = convert(chinese_text, 'zh-cn')
+    
+    chinese_pinyin = pinyin(chinese_text, style=Style.NORMAL)
+    chinese_pinyin = [item[0] for item in chinese_pinyin]
+    
     text_list = []
-    for text in pinyin_list:
-        if text[0] == "S" or text[0] == "A" or text[0] == "-":
-            sp_strs = re.findall(r"-|AP|SP", text)
-            for phn in sp_strs:
-                text_list.append(phn)
+    pinyin_idx = 0
+    for block in blocks:
+        if is_chinese(block):
+            text_list.append(chinese_pinyin[pinyin_idx])
+            pinyin_idx += 1
         else:
-            text_list.append(text)
+            text_list.append(block)
+    
     return text_list
