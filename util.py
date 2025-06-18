@@ -82,14 +82,13 @@ def is_chinese(char):
     return '\u4e00' <= char <= '\u9fff'
 
 
-def is_special(char):
-    return re.match(r'^[-——APSP]+$', char) is not None
+def is_special(block):
+    return any(token in block for token in ['-', 'AP', 'SP'])
 
 
 def get_pinyin(texts):
     texts = preprocess_input(texts, seg_syb="")
-    pattern = re.compile(r'[\u4e00-\u9fff]|[^\u4e00-\u9fff]+')
-    blocks = pattern.findall(texts) 
+    blocks = re.compile(r'[\u4e00-\u9fff]|[^\u4e00-\u9fff]+').findall(texts) 
 
     characters = [block for block in blocks if is_chinese(block)] 
     chinese_text = ''.join(characters)
@@ -105,6 +104,10 @@ def get_pinyin(texts):
             text_list.append(chinese_pinyin[pinyin_idx])
             pinyin_idx += 1
         else:
-            text_list.append(block)
+            if is_special(block):
+                specials = re.compile(r"-|AP|SP").findall(block)
+                text_list.extend(specials)
+            else:
+                text_list.append(block)
     
     return text_list
