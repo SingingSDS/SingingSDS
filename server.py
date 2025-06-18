@@ -12,6 +12,7 @@ import jiwer
 import librosa
 from svs_utils import load_song_database, estimate_sentence_length
 from svs_eval import singmos_warmup, singmos_evaluation
+from util import get_pinyin
 
 
 asr_pipeline = pipeline(
@@ -143,13 +144,13 @@ def on_click_metrics():
     # OWSM ctc + PER
     y, sr = librosa.load("tmp/response.wav", sr=16000)
     asr_result = asr_pipeline(y, generate_kwargs={"language": "mandarin"} )['text']
-    hyp_pinin = lazy_pinyin(asr_result)
+    hyp_pinyin = get_pinyin(asr_result)
 
     with open(f"tmp/llm.txt", "r") as f:
         ref = f.read().replace(' ', '')
 
-    ref_pinin = lazy_pinyin(ref)
-    per = jiwer.wer(" ".join(ref_pinin), " ".join(hyp_pinin))
+    ref_pinyin = get_pinyin(ref)
+    per = jiwer.wer(" ".join(ref_pinyin), " ".join(hyp_pinyin))
     
     audio = librosa.load(f"tmp/response.wav", sr=sample_rate)[0]
     singmos = singmos_evaluation(
