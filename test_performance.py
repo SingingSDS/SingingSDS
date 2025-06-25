@@ -118,10 +118,10 @@ def on_click_metrics(audio_path, ref):
     asr_result = asr_pipeline(y, generate_kwargs={"language": "mandarin"} )['text']
     
     # Espnet embeded g2p, but sometimes it will mispronunce polyphonic characters
-    hyp_pinin = pypinyin_g2p_phone_without_prosody(asr_result)
+    hyp_pinyin = pypinyin_g2p_phone_without_prosody(asr_result)
     
-    ref_pinin = pypinyin_g2p_phone_without_prosody(ref)
-    per = jiwer.wer(ref_pinin, hyp_pinin)
+    ref_pinyin = pypinyin_g2p_phone_without_prosody(ref)
+    per = jiwer.wer(ref_pinyin, hyp_pinyin)
     
     audio = librosa.load(audio_path, sr=22050)[0]
     singmos = singmos_evaluation(
