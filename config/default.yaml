@@ -1,0 +1,15 @@
+asr_model: openai/whisper-large-v3-turbo
+llm_model: google/gemma-2-2b
+svs_model: espnet/aceopencpop_svs_visinger2_40singer_pretrain
+melody_source: sample-lyric-kising
+language: mandarin
+character: Limei
+cache_dir: .cache
+
+track_latency: True
+evaluators:
+  svs:
+    - singmos
+    - per
+    - melody
+    - aesthetic
