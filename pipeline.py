@@ -99,5 +99,5 @@ class SingingDialoguePipeline:
             })
         return results
 
-    def evaluate(self, audio, sample_rate):
-        return run_evaluation(audio, sample_rate, self.evaluators)
+    def evaluate(self, audio_path):
+        return run_evaluation(audio_path, self.evaluators)
