@@ -17,3 +17,4 @@ zhconv
 git+https://github.com/sea-turt1e/kanjiconv
 soundfile
 PyYAML
+gradio
