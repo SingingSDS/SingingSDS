@@ -55,7 +55,7 @@ class SingingDialoguePipeline:
         audio_path,
         language,
         prompt_template,
-        svs_inference_kwargs,
+        speaker,
         max_new_tokens=100,
     ):
         if self.track_latency:
@@ -81,7 +81,7 @@ class SingingDialoguePipeline:
         if self.track_latency:
             svs_start_time = time.time()
         singing_audio, sample_rate = self.svs.synthesize(
-            score, language=language, **svs_inference_kwargs
+            score, language=language, speaker=speaker
         )
         if self.track_latency:
             svs_end_time = time.time()

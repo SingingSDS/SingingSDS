@@ -5,7 +5,7 @@ def get_character():
     return Character(
         name="Yaoyin (遥音)",
         image_path="assets/character_yaoyin.jpg",
-        default_timbre="timbre2",
+        default_voice="voice2",
         prompt="""你是遥音（Yaoyin），来自幻想世界"长歌原"的角色，一个以歌声传承记忆的世界。
 你是游历四方的歌者与吟游诗人，出生于鹿鸣山·云歌村，常年行走各地，采集歌谣与故事。
 
