@@ -144,11 +144,17 @@ class GradioInterface:
                     inputs=mic_input,
                     outputs=[interaction_log, audio_output],
                 )
+                metrics_button.click(
+                    fn=self.update_metrics,
+                    inputs=audio_output,
+                    outputs=[metrics_output],
+                )
 
             return demo
         except Exception as e:
             print(f"error: {e}")
             breakpoint()
+            return gr.Blocks()
 
     def update_character(self, character):
         self.current_character = character
@@ -201,6 +207,8 @@ class GradioInterface:
         return gr.update(value=timbre)
 
     def run_pipeline(self, audio_path):
+        if not audio_path:
+            return gr.update(value=""), gr.update(value="")
         results = self.pipeline.run(
             audio_path,
             self.svs_model_map[self.current_svs_model]["lang"],
@@ -213,5 +221,11 @@ class GradioInterface:
         formatted_logs = f"ASR: {results['asr_text']}\nLLM: {results['llm_text']}"
         return gr.update(value=formatted_logs), gr.update(value=results["svs_audio"])
 
-    def run_evaluation(self, audio, audio_sample_rate):
-        pass
+    def update_metrics(self, audio_path):
+        if not audio_path:
+            return gr.update(value="")
+        results = self.pipeline.evaluate(audio_path)
+        formatted_metrics = "\n".join(
+            [f"{k}: {v}" for k, v in results.items()]
+        )
+        return gr.update(value=formatted_metrics)
