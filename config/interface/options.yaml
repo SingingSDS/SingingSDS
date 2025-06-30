@@ -5,6 +5,8 @@ asr_models:
     name: Whisper large-v3
   - id: openai/whisper-medium
     name: Whisper medium
+  - id: openai/whisper-small
+    name: Whisper small
   - id: sanchit-gandhi/whisper-small-dv
     name: Whisper small-dv
   - id: facebook/wav2vec2-base-960h
@@ -15,6 +17,8 @@ llm_models:
     name: Gemma 2 2B
   - id: MiniMaxAI/MiniMax-M1-80k
     name: MiniMax M1 80k
+  - id: meta-llama/Llama-3.2-3B-Instruct
+    name: Llama 3.2 3B Instruct
 
 svs_models:
   - id: mandarin-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
