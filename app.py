@@ -1,3 +1,9 @@
+import os
+from huggingface_hub import login
+
+if os.getenv("HF_TOKEN"):
+    login(token=os.getenv("HF_TOKEN"))
+
 from interface import GradioInterface
 
 
