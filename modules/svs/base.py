@@ -13,6 +13,8 @@ class AbstractSVSModel(ABC):
     def synthesize(
         self,
         score: list[tuple[float, float, str, int]],
+        language: str,
+        speaker: str,
         **kwargs,
     ) -> tuple[np.ndarray, int]:
         """

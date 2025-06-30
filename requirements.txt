@@ -1,6 +1,6 @@
 git+https://github.com/espnet/espnet.git@3856d998ee0b2fa20f7b8fa48553754f33ed6e63
 espnet_model_zoo
-# pyopenjtalk
+pyopenjtalk
 datasets
 torchaudio
 typeguard==4.4.0
@@ -15,3 +15,6 @@ transformers
 s3prl
 zhconv
 git+https://github.com/sea-turt1e/kanjiconv
+soundfile
+PyYAML
+gradio
