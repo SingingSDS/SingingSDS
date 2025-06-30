@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import os
 from abc import ABC, abstractmethod
 
 import librosa
@@ -7,6 +6,7 @@ import numpy as np
 from transformers import pipeline
 
 ASR_MODEL_REGISTRY = {}
+hf_token = os.getenv("HF_TOKEN")
 
 
 class AbstractASRModel(ABC):
@@ -52,6 +52,7 @@ class WhisperASR(AbstractASRModel):
             "automatic-speech-recognition",
             model=model_id,
             device=0 if device == "cuda" else -1,
+            token=hf_token,
             **kwargs,
         )
 
