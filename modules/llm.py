@@ -1,8 +1,10 @@
+import os
 from abc import ABC, abstractmethod
 
 from transformers import pipeline
 
 LLM_MODEL_REGISTRY = {}
+hf_token = os.getenv("HF_TOKEN")
 
 
 class AbstractLLMModel(ABC):
@@ -46,6 +48,7 @@ class HFTextGenerationLLM(AbstractLLMModel):
             model=model_id,
             device=0 if device == "cuda" else -1,
             return_full_text=False,
+            token=hf_token,
             **kwargs,
         )
 
