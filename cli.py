@@ -13,7 +13,7 @@ logger = getLogger(__name__)
 def get_parser():
     parser = ArgumentParser()
     parser.add_argument("--query_audio", type=str, required=True)
-    parser.add_argument("--config_path", type=str, required=True)
+    parser.add_argument("--config_path", type=str, default="config/cli/yaoyin_default.yaml")
     parser.add_argument("--output_audio", type=str, required=True)
     return parser
 
