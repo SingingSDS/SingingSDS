@@ -1,5 +1,6 @@
 from argparse import ArgumentParser
 from logging import getLogger
+from pathlib import Path
 
 import soundfile as sf
 import yaml
@@ -12,13 +13,15 @@ logger = getLogger(__name__)
 
 def get_parser():
     parser = ArgumentParser()
-    parser.add_argument("--query_audio", type=str, required=True)
-    parser.add_argument("--config_path", type=str, default="config/cli/yaoyin_default.yaml")
-    parser.add_argument("--output_audio", type=str, required=True)
+    parser.add_argument("--query_audio", type=Path, required=True)
+    parser.add_argument(
+        "--config_path", type=Path, default="config/cli/yaoyin_default.yaml"
+    )
+    parser.add_argument("--output_audio", type=Path, required=True)
     return parser
 
 
-def load_config(config_path: str):
+def load_config(config_path: Path):
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
     return config
@@ -39,6 +42,7 @@ def main():
         f"Input: {args.query_audio}, Output: {args.output_audio}, ASR results: {results['asr_text']}, LLM results: {results['llm_text']}"
     )
     svs_audio, svs_sample_rate = results["svs_audio"]
+    args.output_audio.parent.mkdir(parents=True, exist_ok=True)
     sf.write(args.output_audio, svs_audio, svs_sample_rate)
 
 
