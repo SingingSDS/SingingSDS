@@ -57,10 +57,5 @@ class WhisperASR(AbstractASRModel):
 
     def transcribe(self, audio: np.ndarray, audio_sample_rate: int, language: str, **kwargs) -> str:
         if audio_sample_rate != 16000:
-            try:
-                audio, _ = librosa.resample(audio, orig_sr=audio_sample_rate, target_sr=16000)
-            except Exception as e:
-                breakpoint()
-                print(f"Error resampling audio: {e}")
-                audio = librosa.resample(audio, orig_sr=audio_sample_rate, target_sr=16000)
-        return self.pipe(audio, generate_kwargs={"language": language}).get("text", "")
+            audio = librosa.resample(audio, orig_sr=audio_sample_rate, target_sr=16000)
+        return self.pipe(audio, generate_kwargs={"language": language}, return_timestamps=False).get("text", "")

@@ -53,7 +53,7 @@ class ESPNetSVS(AbstractSVSModel):
             phoneme_mappers = {}
         return phoneme_mappers
 
-    def _preprocess(self, score: list[tuple[float, float, str, int]], language: str):
+    def _preprocess(self, score: list[tuple[float, float, str, int] | tuple[float, float, str, float]], language: str):
         if language not in self.phoneme_mappers:
             raise ValueError(f"Unsupported language: {language} for {self.model_id}")
         phoneme_mapper = self.phoneme_mappers[language]
@@ -99,7 +99,7 @@ class ESPNetSVS(AbstractSVSModel):
         return batch
 
     def synthesize(
-        self, score: list[tuple[float, float, str, int]], language: str, speaker: str, **kwargs
+        self, score: list[tuple[float, float, str, float] | tuple[float, float, str, int]], language: str, speaker: str, **kwargs
     ):
         batch = self._preprocess(score, language)
         if self.model_id == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":

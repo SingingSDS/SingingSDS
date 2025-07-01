@@ -29,6 +29,7 @@ class SingingDialoguePipeline:
         self.melody_controller = MelodyController(
             config["melody_source"], self.cache_dir
         )
+        self.max_sentences = config.get("max_sentences", 2)
         self.track_latency = config.get("track_latency", False)
         self.evaluators = load_evaluators(config.get("evaluators", {}).get("svs", []))
 
@@ -75,8 +76,7 @@ class SingingDialoguePipeline:
         if self.track_latency:
             llm_end_time = time.time()
             llm_latency = llm_end_time - llm_start_time
-        print(f"llm output: {output}确认一下是不是不含prompt的")
-        llm_response = clean_llm_output(output, language=language)
+        llm_response = clean_llm_output(output, language=language, max_sentences=self.max_sentences)
         score = self.melody_controller.generate_score(llm_response, language)
         if self.track_latency:
             svs_start_time = time.time()

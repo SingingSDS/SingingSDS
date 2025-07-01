@@ -3,12 +3,13 @@ from typing import Optional
 
 
 def remove_non_zh_jp(text: str) -> str:
-    pattern = r"[^\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\u3000-\u303f\uff01-\uffef]"
+    pattern = r"[^\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\u3000-\u303f\uff01-\uffef\s]"
     return re.sub(pattern, "", text)
 
 
 def truncate_sentences(text: str, max_sentences: int) -> str:
-    sentences = re.split(r"(?<=[。！？])", text)
+    sentences = re.split(r"(?<=[。！？!?~])|(?:\n+)|(?: {2,})", text)
+    sentences = [s.strip() for s in sentences if s.strip()]
     return "".join(sentences[:max_sentences]).strip()
 
 

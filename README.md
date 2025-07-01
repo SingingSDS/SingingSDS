@@ -47,7 +47,7 @@ pip install -r requirements.txt
 #### Example Usage
 
 ```bash
-python cli.py --query_audio data/query/hello.wav --config_path config/cli/yaoyin_default.yaml --output_audio outputs/yaoyin_hello.wav
+python cli.py --query_audio tests/audio/hello.wav --config_path config/cli/yaoyin_default.yaml --output_audio outputs/yaoyin_hello.wav
 ```
 
 #### Parameter Description
