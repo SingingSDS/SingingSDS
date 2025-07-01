@@ -1,6 +1,11 @@
-import torch
+from __future__ import annotations
+
 import time
+from pathlib import Path
+
 import librosa
+import soundfile as sf
+import torch
 
 from modules.asr import get_asr_model
 from modules.llm import get_llm_model
@@ -57,7 +62,8 @@ class SingingDialoguePipeline:
         language,
         prompt_template,
         speaker,
-        max_new_tokens=100,
+        output_audio_path: Path | str = None,
+        max_new_tokens=50,
     ):
         if self.track_latency:
             asr_start_time = time.time()
@@ -76,7 +82,9 @@ class SingingDialoguePipeline:
         if self.track_latency:
             llm_end_time = time.time()
             llm_latency = llm_end_time - llm_start_time
-        llm_response = clean_llm_output(output, language=language, max_sentences=self.max_sentences)
+        llm_response = clean_llm_output(
+            output, language=language, max_sentences=self.max_sentences
+        )
         score = self.melody_controller.generate_score(llm_response, language)
         if self.track_latency:
             svs_start_time = time.time()
@@ -89,8 +97,12 @@ class SingingDialoguePipeline:
         results = {
             "asr_text": asr_result,
             "llm_text": llm_response,
-            "svs_audio": (singing_audio, sample_rate),
+            "svs_audio": (sample_rate, singing_audio),
         }
+        if output_audio_path:
+            Path(output_audio_path).parent.mkdir(parents=True, exist_ok=True)
+            sf.write(output_audio_path, singing_audio, sample_rate)
+            results["output_audio_path"] = output_audio_path
         if self.track_latency:
             results["metrics"] = {
                 "asr_latency": asr_latency,

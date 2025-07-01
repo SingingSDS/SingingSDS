@@ -2,7 +2,6 @@ from argparse import ArgumentParser
 from logging import getLogger
 from pathlib import Path
 
-import soundfile as sf
 import yaml
 
 from characters import CHARACTERS
@@ -37,13 +36,16 @@ def main():
     character_name = config["prompt_template_character"]
     character = CHARACTERS[character_name]
     prompt_template = character.prompt
-    results = pipeline.run(args.query_audio, language, prompt_template, speaker)
+    results = pipeline.run(
+        args.query_audio,
+        language,
+        prompt_template,
+        speaker,
+        output_audio_path=args.output_audio,
+    )
     logger.info(
         f"Input: {args.query_audio}, Output: {args.output_audio}, ASR results: {results['asr_text']}, LLM results: {results['llm_text']}"
     )
-    svs_audio, svs_sample_rate = results["svs_audio"]
-    args.output_audio.parent.mkdir(parents=True, exist_ok=True)
-    sf.write(args.output_audio, svs_audio, svs_sample_rate)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+import time
+import uuid
+
 import gradio as gr
 import yaml
 
@@ -201,29 +204,29 @@ class GradioInterface:
         return gr.update(value=self.current_melody_source)
 
     def update_voice(self, voice):
-        self.current_voice = self.svs_model_map[self.current_svs_model]["voices"][
-            voice
-        ]
+        self.current_voice = self.svs_model_map[self.current_svs_model]["voices"][voice]
         return gr.update(value=voice)
 
     def run_pipeline(self, audio_path):
         if not audio_path:
             return gr.update(value=""), gr.update(value="")
+        tmp_file = f"audio_{int(time.time())}_{uuid.uuid4().hex[:8]}.wav"
         results = self.pipeline.run(
             audio_path,
             self.svs_model_map[self.current_svs_model]["lang"],
             self.character_info[self.current_character].prompt,
             self.current_voice,
-            max_new_tokens=100,
+            output_audio_path=tmp_file,
+            max_new_tokens=50,
         )
         formatted_logs = f"ASR: {results['asr_text']}\nLLM: {results['llm_text']}"
-        return gr.update(value=formatted_logs), gr.update(value=results["svs_audio"])
+        return gr.update(value=formatted_logs), gr.update(
+            value=results["output_audio_path"]
+        )
 
     def update_metrics(self, audio_path):
         if not audio_path:
             return gr.update(value="")
         results = self.pipeline.evaluate(audio_path)
-        formatted_metrics = "\n".join(
-            [f"{k}: {v}" for k, v in results.items()]
-        )
+        formatted_metrics = "\n".join([f"{k}: {v}" for k, v in results.items()])
         return gr.update(value=formatted_metrics)
