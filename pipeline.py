@@ -92,11 +92,11 @@ class SingingDialoguePipeline:
             "svs_audio": (singing_audio, sample_rate),
         }
         if self.track_latency:
-            results["metrics"].update({
+            results["metrics"] = {
                 "asr_latency": asr_latency,
                 "llm_latency": llm_latency,
                 "svs_latency": svs_latency,
-            })
+            }
         return results
 
     def evaluate(self, audio_path):
