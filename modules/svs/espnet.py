@@ -90,10 +90,10 @@ class ESPNetSVS(AbstractSVSModel):
             pre_phn = phn_units[-1]
 
         batch = {
-            "score": {
-                "tempo": 120,  # does not affect svs result, as note durations are in time unit
-                "notes": notes,
-            },
+            "score": (
+                120,  # does not affect svs result, as note durations are in time unit
+                notes,
+            ),
             "text": " ".join(phns),
         }
         return batch
