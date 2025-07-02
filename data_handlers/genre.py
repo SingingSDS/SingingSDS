@@ -7,10 +7,13 @@ class Genre(MelodyDatasetHandler):
     def __init__(self, melody_type, *args, **kwargs):
         import json
 
-        with open("data/genre/word_data.json", "r", encoding="utf-8") as f:
-            song_db = json.load(f)
-        song_db = {song["id"]: song for song in song_db} # id as major
-        self.song_db = song_db
+        with open("data/genre/word_data_zh.json", "r", encoding="utf-8") as f:
+            song_db_zh = json.load(f)
+        song_db_zh = {f"zh_{song['id']}": song for song in song_db_zh}  # id as major
+        with open("data/genre/word_data_en.json", "r", encoding="utf-8") as f:
+            song_db_en = json.load(f)
+        song_db_en = {f"en_{song['id']}": song for song in song_db_en} # id as major
+        self.song_db = {**song_db_zh, **song_db_en}
 
     def get_song_ids(self):
         return list(self.song_db.keys())
