@@ -1,3 +1,6 @@
+import time
+import uuid
+
 import gradio as gr
 import yaml
 
@@ -17,8 +20,8 @@ class GradioInterface:
         self.current_svs_model = (
             f"{self.default_config['language']}-{self.default_config['svs_model']}"
         )
-        self.current_timbre = self.svs_model_map[self.current_svs_model]["embeddings"][
-            self.character_info[self.current_character].default_timbre
+        self.current_voice = self.svs_model_map[self.current_svs_model]["voices"][
+            self.character_info[self.current_character].default_voice
         ]
         self.pipeline = SingingDialoguePipeline(self.default_config)
 
@@ -104,21 +107,21 @@ class GradioInterface:
                                 value=self.current_svs_model,
                             )
                         with gr.Row():
-                            timbre_radio = gr.Radio(
-                                label="Singing Timbre",
+                            voice_radio = gr.Radio(
+                                label="Singing voice",
                                 choices=list(
                                     self.svs_model_map[self.current_svs_model][
-                                        "embeddings"
+                                        "voices"
                                     ].keys()
                                 ),
                                 value=self.character_info[
                                     self.current_character
-                                ].default_timbre,
+                                ].default_voice,
                             )
                 character_radio.change(
                     fn=self.update_character,
                     inputs=character_radio,
-                    outputs=[character_image, timbre_radio],
+                    outputs=[character_image, voice_radio],
                 )
                 asr_radio.change(
                     fn=self.update_asr_model, inputs=asr_radio, outputs=asr_radio
@@ -129,35 +132,41 @@ class GradioInterface:
                 svs_radio.change(
                     fn=self.update_svs_model,
                     inputs=svs_radio,
-                    outputs=[svs_radio, timbre_radio],
+                    outputs=[svs_radio, voice_radio],
                 )
                 melody_radio.change(
                     fn=self.update_melody_source,
                     inputs=melody_radio,
                     outputs=melody_radio,
                 )
-                timbre_radio.change(
-                    fn=self.update_timbre, inputs=timbre_radio, outputs=timbre_radio
+                voice_radio.change(
+                    fn=self.update_voice, inputs=voice_radio, outputs=voice_radio
                 )
                 mic_input.change(
                     fn=self.run_pipeline,
                     inputs=mic_input,
                     outputs=[interaction_log, audio_output],
                 )
+                metrics_button.click(
+                    fn=self.update_metrics,
+                    inputs=audio_output,
+                    outputs=[metrics_output],
+                )
 
             return demo
         except Exception as e:
             print(f"error: {e}")
             breakpoint()
+            return gr.Blocks()
 
     def update_character(self, character):
         self.current_character = character
-        character_timbre = self.character_info[self.current_character].default_timbre
-        self.current_timbre = self.svs_model_map[self.current_svs_model]["embeddings"][
-            character_timbre
+        character_voice = self.character_info[self.current_character].default_voice
+        self.current_voice = self.svs_model_map[self.current_svs_model]["voices"][
+            character_voice
         ]
         return gr.update(value=self.character_info[character].image_path), gr.update(
-            value=character_timbre
+            value=character_voice
         )
 
     def update_asr_model(self, asr_model):
@@ -170,23 +179,23 @@ class GradioInterface:
 
     def update_svs_model(self, svs_model):
         self.current_svs_model = svs_model
-        character_timbre = self.character_info[self.current_character].default_timbre
-        self.current_timbre = self.svs_model_map[self.current_svs_model]["embeddings"][
-            character_timbre
+        character_voice = self.character_info[self.current_character].default_voice
+        self.current_voice = self.svs_model_map[self.current_svs_model]["voices"][
+            character_voice
         ]
         self.pipeline.set_svs_model(
             self.svs_model_map[self.current_svs_model]["model_path"]
         )
         print(
-            f"SVS model updated to {self.current_svs_model}. Will set gradio svs_radio to {svs_model} and timbre_radio to {character_timbre}"
+            f"SVS model updated to {self.current_svs_model}. Will set gradio svs_radio to {svs_model} and voice_radio to {character_voice}"
         )
         return (
             gr.update(value=svs_model),
             gr.update(
                 choices=list(
-                    self.svs_model_map[self.current_svs_model]["embeddings"].keys()
+                    self.svs_model_map[self.current_svs_model]["voices"].keys()
                 ),
-                value=character_timbre,
+                value=character_voice,
             ),
         )
 
@@ -194,24 +203,30 @@ class GradioInterface:
         self.current_melody_source = melody_source
         return gr.update(value=self.current_melody_source)
 
-    def update_timbre(self, timbre):
-        self.current_timbre = self.svs_model_map[self.current_svs_model]["embeddings"][
-            timbre
-        ]
-        return gr.update(value=timbre)
+    def update_voice(self, voice):
+        self.current_voice = self.svs_model_map[self.current_svs_model]["voices"][voice]
+        return gr.update(value=voice)
 
     def run_pipeline(self, audio_path):
+        if not audio_path:
+            return gr.update(value=""), gr.update(value="")
+        tmp_file = f"audio_{int(time.time())}_{uuid.uuid4().hex[:8]}.wav"
         results = self.pipeline.run(
             audio_path,
             self.svs_model_map[self.current_svs_model]["lang"],
             self.character_info[self.current_character].prompt,
-            svs_inference_kwargs={
-                "speaker": self.current_timbre,
-            },
-            max_new_tokens=100,
+            self.current_voice,
+            output_audio_path=tmp_file,
+            max_new_tokens=50,
         )
         formatted_logs = f"ASR: {results['asr_text']}\nLLM: {results['llm_text']}"
-        return gr.update(value=formatted_logs), gr.update(value=results["svs_audio"])
+        return gr.update(value=formatted_logs), gr.update(
+            value=results["output_audio_path"]
+        )
 
-    def run_evaluation(self, audio, audio_sample_rate):
-        pass
+    def update_metrics(self, audio_path):
+        if not audio_path:
+            return gr.update(value="")
+        results = self.pipeline.evaluate(audio_path)
+        formatted_metrics = "\n".join([f"{k}: {v}" for k, v in results.items()])
+        return gr.update(value=formatted_metrics)

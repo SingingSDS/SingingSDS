@@ -3,7 +3,8 @@ from interface import GradioInterface
 
 def main():
     demo = GradioInterface(
-        options_config="config/options.yaml", default_config="config/default.yaml"
+        options_config="config/interface/options.yaml",
+        default_config="config/interface/default.yaml",
     ).create_interface()
     demo.launch()
 

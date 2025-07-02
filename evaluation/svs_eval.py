@@ -37,7 +37,8 @@ def init_audiobox_aesthetics():
 # ----------- Evaluation -----------
 
 
-def eval_singmos(audio_array, sr, predictor):
+def eval_singmos(audio_path, predictor):
+    audio_array, sr = librosa.load(audio_path, sr=44100)
     wav = librosa.resample(audio_array, orig_sr=sr, target_sr=16000)
     wav_tensor = torch.from_numpy(wav).unsqueeze(0)
     length_tensor = torch.tensor([wav_tensor.shape[1]])
@@ -71,7 +72,8 @@ def compute_dissonance_rate(intervals, dissonant_intervals={1, 2, 6, 10, 11}):
     return np.mean(dissonant) if intervals else np.nan
 
 
-def eval_per(audio_array, sr, model=None):
+def eval_per(audio_path, model=None):
+    audio_array, sr = librosa.load(audio_path, sr=16000)
     # TODO: implement PER evaluation
     return {}
 
@@ -97,20 +99,16 @@ def load_evaluators(config):
     return loaded
 
 
-def run_evaluation(audio_array, sr, evaluators):
+def run_evaluation(audio_path, evaluators):
     results = {}
     if "singmos" in evaluators:
-        results.update(eval_singmos(audio_array, sr, evaluators["singmos"]))
+        results.update(eval_singmos(audio_path, evaluators["singmos"]))
     if "per" in evaluators:
-        results.update(eval_per(audio_array, sr, evaluators["per"]))
-    # create a tmp file with unique name
-    tmp_path = Path(".tmp") / f"{uuid.uuid4()}.wav"
-    sf.write(tmp_path, audio_array, sr)
+        results.update(eval_per(audio_path, evaluators["per"]))
     if "melody" in evaluators:
-        results.update(eval_melody_metrics(tmp_path, evaluators["melody"]))
+        results.update(eval_melody_metrics(audio_path, evaluators["melody"]))
     if "aesthetic" in evaluators:
-        results.update(eval_aesthetic(tmp_path, evaluators["aesthetic"]))
-    tmp_path.unlink()
+        results.update(eval_aesthetic(audio_path, evaluators["aesthetic"]))
     return results
 
 
@@ -122,9 +120,8 @@ if __name__ == "__main__":
     parser.add_argument("--results_csv", type=str, required=True)
     parser.add_argument("--evaluators", type=str, default="singmos,melody,aesthetic")
     args = parser.parse_args()
-    audio_array, sr = librosa.load(args.wav_path, sr=None)
     evaluators = load_evaluators(args.evaluators.split(","))
-    results = run_evaluation(audio_array, sr, evaluators)
+    results = run_evaluation(args.wav_path, evaluators)
     print(results)
 
     with open(args.results_csv, "a") as f:

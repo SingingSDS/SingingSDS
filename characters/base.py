@@ -5,5 +5,5 @@ from dataclasses import dataclass
 class Character:
     name: str
     image_path: str
-    default_timbre: str
+    default_voice: str
     prompt: str

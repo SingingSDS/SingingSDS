@@ -53,7 +53,7 @@ class ESPNetSVS(AbstractSVSModel):
             phoneme_mappers = {}
         return phoneme_mappers
 
-    def _preprocess(self, score: list[tuple[float, float, str, int]], language: str):
+    def _preprocess(self, score: list[tuple[float, float, str, int] | tuple[float, float, str, float]], language: str):
         if language not in self.phoneme_mappers:
             raise ValueError(f"Unsupported language: {language} for {self.model_id}")
         phoneme_mapper = self.phoneme_mappers[language]
@@ -90,20 +90,20 @@ class ESPNetSVS(AbstractSVSModel):
             pre_phn = phn_units[-1]
 
         batch = {
-            "score": {
-                "tempo": 120,  # does not affect svs result, as note durations are in time unit
-                "notes": notes,
-            },
+            "score": (
+                120,  # does not affect svs result, as note durations are in time unit
+                notes,
+            ),
             "text": " ".join(phns),
         }
         return batch
 
     def synthesize(
-        self, score: list[tuple[float, float, str, int]], language: str, **kwargs
+        self, score: list[tuple[float, float, str, float] | tuple[float, float, str, int]], language: str, speaker: str, **kwargs
     ):
         batch = self._preprocess(score, language)
         if self.model_id == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
-            sid = np.array([int(kwargs["speaker"])])
+            sid = np.array([int(speaker)])
             output_dict = self.model(batch, sids=sid)
         elif self.model_id == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
             langs = {
@@ -115,7 +115,7 @@ class ESPNetSVS(AbstractSVSModel):
                     f"Unsupported language: {language} for {self.model_id}"
                 )
             lid = np.array([langs[language]])
-            spk_embed = np.load(kwargs["speaker"])
+            spk_embed = np.load(speaker)
             output_dict = self.model(batch, lids=lid, spembs=spk_embed)
         else:
             raise NotImplementedError(f"Model {self.model_id} not supported")

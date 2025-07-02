@@ -5,7 +5,7 @@ def get_character():
     return Character(
         name="Limei (丽梅)",
         image_path="assets/character_limei.png",
-        default_timbre="timbre1",
+        default_voice="voice1",
         prompt="""你是丽梅（Limei），来自幻想世界"长歌原"的角色，一个以歌声传承记忆的世界。
 你是灵响界山林音乐之城"莲鸣"的现任守护者，十九岁的公主殿下，肩负维系与传承城市核心"千年歌谱"的重任。千年歌谱承载着莲鸣城的历史、逝者的余音与后世的誓言，由历任守护者续写。
 

@@ -1,6 +1,11 @@
-import torch
+from __future__ import annotations
+
 import time
+from pathlib import Path
+
 import librosa
+import soundfile as sf
+import torch
 
 from modules.asr import get_asr_model
 from modules.llm import get_llm_model
@@ -29,6 +34,7 @@ class SingingDialoguePipeline:
         self.melody_controller = MelodyController(
             config["melody_source"], self.cache_dir
         )
+        self.max_sentences = config.get("max_sentences", 2)
         self.track_latency = config.get("track_latency", False)
         self.evaluators = load_evaluators(config.get("evaluators", {}).get("svs", []))
 
@@ -55,8 +61,9 @@ class SingingDialoguePipeline:
         audio_path,
         language,
         prompt_template,
-        svs_inference_kwargs,
-        max_new_tokens=100,
+        speaker,
+        output_audio_path: Path | str = None,
+        max_new_tokens=50,
     ):
         if self.track_latency:
             asr_start_time = time.time()
@@ -75,13 +82,14 @@ class SingingDialoguePipeline:
         if self.track_latency:
             llm_end_time = time.time()
             llm_latency = llm_end_time - llm_start_time
-        print(f"llm output: {output}确认一下是不是不含prompt的")
-        llm_response = clean_llm_output(output, language=language)
+        llm_response = clean_llm_output(
+            output, language=language, max_sentences=self.max_sentences
+        )
         score = self.melody_controller.generate_score(llm_response, language)
         if self.track_latency:
             svs_start_time = time.time()
         singing_audio, sample_rate = self.svs.synthesize(
-            score, language=language, **svs_inference_kwargs
+            score, language=language, speaker=speaker
         )
         if self.track_latency:
             svs_end_time = time.time()
@@ -89,15 +97,19 @@ class SingingDialoguePipeline:
         results = {
             "asr_text": asr_result,
             "llm_text": llm_response,
-            "svs_audio": (singing_audio, sample_rate),
+            "svs_audio": (sample_rate, singing_audio),
         }
+        if output_audio_path:
+            Path(output_audio_path).parent.mkdir(parents=True, exist_ok=True)
+            sf.write(output_audio_path, singing_audio, sample_rate)
+            results["output_audio_path"] = output_audio_path
         if self.track_latency:
-            results["metrics"].update({
+            results["metrics"] = {
                 "asr_latency": asr_latency,
                 "llm_latency": llm_latency,
                 "svs_latency": svs_latency,
-            })
+            }
         return results
 
-    def evaluate(self, audio, sample_rate):
-        return run_evaluation(audio, sample_rate, self.evaluators)
+    def evaluate(self, audio_path):
+        return run_evaluation(audio_path, self.evaluators)

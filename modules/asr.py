@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+import os
 from abc import ABC, abstractmethod
 
 import librosa
@@ -7,17 +6,17 @@ import numpy as np
 from transformers import pipeline
 
 ASR_MODEL_REGISTRY = {}
+hf_token = os.getenv("HF_TOKEN")
 
 
 class AbstractASRModel(ABC):
-    @abstractmethod
     def __init__(
         self, model_id: str, device: str = "cpu", cache_dir: str = "cache", **kwargs
     ):
+        print(f"Loading ASR model {model_id}...")
         self.model_id = model_id
         self.device = device
         self.cache_dir = cache_dir
-        pass
 
     @abstractmethod
     def transcribe(self, audio: np.ndarray, audio_sample_rate: int, **kwargs) -> str:
@@ -52,15 +51,11 @@ class WhisperASR(AbstractASRModel):
             "automatic-speech-recognition",
             model=model_id,
             device=0 if device == "cuda" else -1,
+            token=hf_token,
             **kwargs,
         )
 
     def transcribe(self, audio: np.ndarray, audio_sample_rate: int, language: str, **kwargs) -> str:
         if audio_sample_rate != 16000:
-            try:
-                audio, _ = librosa.resample(audio, orig_sr=audio_sample_rate, target_sr=16000)
-            except Exception as e:
-                breakpoint()
-                print(f"Error resampling audio: {e}")
-                audio = librosa.resample(audio, orig_sr=audio_sample_rate, target_sr=16000)
-        return self.pipe(audio, generate_kwargs={"language": language}).get("text", "")
+            audio = librosa.resample(audio, orig_sr=audio_sample_rate, target_sr=16000)
+        return self.pipe(audio, generate_kwargs={"language": language}, return_timestamps=False).get("text", "")

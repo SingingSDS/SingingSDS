@@ -32,6 +32,7 @@ for plan in ace_phonemes_all_plans["plans"]:
 
 
 def preprocess_text(text: str, language: str) -> list[str]:
+    text = text.replace(" ", "")
     if language == "mandarin":
         text_list = to_pinyin(text)
     elif language == "japanese":

@@ -5,6 +5,8 @@ asr_models:
     name: Whisper large-v3
   - id: openai/whisper-medium
     name: Whisper medium
+  - id: openai/whisper-small
+    name: Whisper small
   - id: sanchit-gandhi/whisper-small-dv
     name: Whisper small-dv
   - id: facebook/wav2vec2-base-960h
@@ -15,38 +17,40 @@ llm_models:
     name: Gemma 2 2B
   - id: MiniMaxAI/MiniMax-M1-80k
     name: MiniMax M1 80k
+  - id: meta-llama/Llama-3.2-3B-Instruct
+    name: Llama 3.2 3B Instruct
 
 svs_models:
   - id: mandarin-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     name: Visinger2 (Bilingual)-zh
     model_path: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     lang: mandarin
-    embeddings:
-      timbre1: resource/singer/singer_embedding_ace-2.npy
-      timbre2: resource/singer/singer_embedding_ace-8.npy
-      timbre3: resource/singer/singer_embedding_itako.npy
-      timbre4: resource/singer/singer_embedding_kising_orange.npy
-      timbre5: resource/singer/singer_embedding_m4singer_Alto-4.npy
+    voices:
+      voice1: resource/singer/singer_embedding_ace-2.npy
+      voice2: resource/singer/singer_embedding_ace-8.npy
+      voice3: resource/singer/singer_embedding_itako.npy
+      voice4: resource/singer/singer_embedding_kising_orange.npy
+      voice5: resource/singer/singer_embedding_m4singer_Alto-4.npy
   - id: japanese-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     name: Visinger2 (Bilingual)-jp
     model_path: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     lang: japanese
-    embeddings:
-      timbre1: resource/singer/singer_embedding_ace-2.npy
-      timbre2: resource/singer/singer_embedding_ace-8.npy
-      timbre3: resource/singer/singer_embedding_itako.npy
-      timbre4: resource/singer/singer_embedding_kising_orange.npy
-      timbre5: resource/singer/singer_embedding_m4singer_Alto-4.npy
+    voices:
+      voice1: resource/singer/singer_embedding_ace-2.npy
+      voice2: resource/singer/singer_embedding_ace-8.npy
+      voice3: resource/singer/singer_embedding_itako.npy
+      voice4: resource/singer/singer_embedding_kising_orange.npy
+      voice5: resource/singer/singer_embedding_m4singer_Alto-4.npy
   - id: mandarin-espnet/aceopencpop_svs_visinger2_40singer_pretrain
     name: Visinger2 (Chinese)
     model_path: espnet/aceopencpop_svs_visinger2_40singer_pretrain
     lang: mandarin
-    embeddings:
-      timbre1: 5
-      timbre2: 8
-      timbre3: 12
-      timbre4: 15
-      timbre5: 29
+    voices:
+      voice1: 5
+      voice2: 8
+      voice3: 12
+      voice4: 15
+      voice5: 29
 
 melody_sources:
   - id: gen-random-none
