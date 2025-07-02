@@ -13,6 +13,8 @@ asr_models:
     name: Wav2Vec2-Base-960h
 
 llm_models:
+  - id: gemini-2.5-flash
+    name: Gemini 2.5 Flash
   - id: google/gemma-2-2b
     name: Gemma 2 2B
   - id: MiniMaxAI/MiniMax-M1-80k
