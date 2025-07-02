@@ -11,6 +11,7 @@ if __name__ == "__main__":
         # "deepseek-ai/DeepSeek-R1-0528",
         # "openai-community/gpt2-xl",
         # "google/gemma-2-2b",
+        # "gemini-2.5-flash",
     ]
     for model_id in supported_llms:
         try:
