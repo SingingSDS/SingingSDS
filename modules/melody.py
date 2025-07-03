@@ -37,7 +37,7 @@ class MelodyController:
                 return ""
 
             prompt = (
-                "\n请按照歌词格式回答我的问题，每句需遵循以下字数规则："
+                "\n请按照歌词格式回复，每句需遵循以下字数规则："
                 + "".join(
                     [
                         f"\n第{i}句：{c}个字"
