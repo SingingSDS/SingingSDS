@@ -14,17 +14,17 @@ from .registry import register_svs_model
 
 @register_svs_model("espnet/")
 class ESPNetSVS(AbstractSVSModel):
-    def __init__(self, model_id: str, device="cpu", cache_dir="cache", **kwargs):
+    def __init__(self, model_id: str, device="auto", cache_dir="cache", **kwargs):
         from espnet2.bin.svs_inference import SingingGenerate
         from espnet_model_zoo.downloader import ModelDownloader
-
-        print(f"Downloading {model_id} to {cache_dir}") # TODO: should improve log code
+        if device == "auto":
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
         downloaded = ModelDownloader(cache_dir).download_and_unpack(model_id)
-        print(f"Downloaded {model_id} to {cache_dir}") # TODO: should improve log code
         self.model = SingingGenerate(
             train_config=downloaded["train_config"],
             model_file=downloaded["model_file"],
-            device=device,
+            device=self.device,
         )
         self.model_id = model_id
         self.output_sample_rate = self.model.fs

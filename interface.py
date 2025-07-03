@@ -217,7 +217,6 @@ class GradioInterface:
             self.character_info[self.current_character].prompt,
             self.current_voice,
             output_audio_path=tmp_file,
-            max_new_tokens=50,
         )
         formatted_logs = f"ASR: {results['asr_text']}\nLLM: {results['llm_text']}"
         return gr.update(value=formatted_logs), gr.update(

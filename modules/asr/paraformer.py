@@ -17,7 +17,7 @@ from .registry import register_asr_model
 @register_asr_model("funasr/paraformer-zh")
 class ParaformerASR(AbstractASRModel):
     def __init__(
-        self, model_id: str, device: str = "cpu", cache_dir: str = "cache", **kwargs
+        self, model_id: str, device: str = "auto", cache_dir: str = "cache", **kwargs
     ):
         super().__init__(model_id, device, cache_dir, **kwargs)
 

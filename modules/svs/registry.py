@@ -12,7 +12,7 @@ def register_svs_model(prefix: str):
     return wrapper
 
 
-def get_svs_model(model_id: str, device="cpu", **kwargs) -> AbstractSVSModel:
+def get_svs_model(model_id: str, device="auto", **kwargs) -> AbstractSVSModel:
     for prefix, cls in SVS_MODEL_REGISTRY.items():
         if model_id.startswith(prefix):
             return cls(model_id, device=device, **kwargs)

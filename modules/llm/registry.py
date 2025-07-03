@@ -12,7 +12,7 @@ def register_llm_model(prefix: str):
     return wrapper
 
 
-def get_llm_model(model_id: str, device="cpu", **kwargs) -> AbstractLLMModel:
+def get_llm_model(model_id: str, device="auto", **kwargs) -> AbstractLLMModel:
     for prefix, cls in LLM_MODEL_REGISTRY.items():
         if model_id.startswith(prefix):
             return cls(model_id, device=device, **kwargs)

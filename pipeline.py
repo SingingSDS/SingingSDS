@@ -60,10 +60,9 @@ class SingingDialoguePipeline:
         self,
         audio_path,
         language,
-        prompt_template,
+        system_prompt,
         speaker,
         output_audio_path: Path | str = None,
-        max_new_tokens=50,
     ):
         if self.track_latency:
             asr_start_time = time.time()
@@ -74,11 +73,10 @@ class SingingDialoguePipeline:
         if self.track_latency:
             asr_end_time = time.time()
             asr_latency = asr_end_time - asr_start_time
-        melody_prompt = self.melody_controller.get_melody_constraints()
-        prompt = prompt_template.format(melody_prompt, asr_result)
+        melody_prompt = self.melody_controller.get_melody_constraints(max_num_phrases=self.max_sentences)
         if self.track_latency:
             llm_start_time = time.time()
-        output = self.llm.generate(prompt, max_new_tokens=max_new_tokens)
+        output = self.llm.generate(asr_result, system_prompt + melody_prompt)
         if self.track_latency:
             llm_end_time = time.time()
             llm_latency = llm_end_time - llm_start_time

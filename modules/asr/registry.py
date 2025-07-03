@@ -12,7 +12,7 @@ def register_asr_model(prefix: str):
     return wrapper
 
 
-def get_asr_model(model_id: str, device="cpu", **kwargs) -> AbstractASRModel:
+def get_asr_model(model_id: str, device="auto", **kwargs) -> AbstractASRModel:
     for prefix, cls in ASR_MODEL_REGISTRY.items():
         if model_id.startswith(prefix):
             return cls(model_id, device=device, **kwargs)

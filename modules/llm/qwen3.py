@@ -1,5 +1,7 @@
 # Ref: https://qwenlm.github.io/blog/qwen3/
 
+from typing import Optional
+
 from .base import AbstractLLMModel
 from .registry import register_llm_model
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -19,11 +21,15 @@ class Qwen3LLM(AbstractLLMModel):
     def generate(
         self,
         prompt: str,
-        enable_thinking: bool = True,
-        max_new_tokens: int = 32768,
+        system_prompt: Optional[str] = None,
+        max_new_tokens: int = 256,
+        enable_thinking: bool = False,
         **kwargs
     ) -> str:
-        messages = [{"role": "user", "content": prompt}]
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
         text = self.tokenizer.apply_chat_template(
             messages,
             tokenize=False,

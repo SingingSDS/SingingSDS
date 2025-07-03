@@ -14,7 +14,7 @@ hf_token = os.getenv("HF_TOKEN")
 @register_asr_model("openai/whisper")
 class WhisperASR(AbstractASRModel):
     def __init__(
-        self, model_id: str, device: str = "cpu", cache_dir: str = "cache", **kwargs
+        self, model_id: str, device: str = "auto", cache_dir: str = "cache", **kwargs
     ):
         super().__init__(model_id, device, cache_dir, **kwargs)
         model_kwargs = kwargs.setdefault("model_kwargs", {})
@@ -22,7 +22,7 @@ class WhisperASR(AbstractASRModel):
         self.pipe = pipeline(
             "automatic-speech-recognition",
             model=model_id,
-            device=0 if device == "cuda" else -1,
+            device_map=device,
             token=hf_token,
             **kwargs,
         )
