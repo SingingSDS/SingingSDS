@@ -22,5 +22,7 @@ google-genai
 funasr
 librosa
 accelerate
+# SingMOS dependencies
+s3prl
 # MiniMax dependencies
 optimum-quanto
