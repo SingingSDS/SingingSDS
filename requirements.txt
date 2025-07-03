@@ -17,4 +17,8 @@ git+https://github.com/sea-turt1e/kanjiconv
 soundfile
 PyYAML
 gradio
-pydantic==2.10.6
+google-genai
+funasr
+librosa
+# MiniMax dependencies
+optimum-quanto
