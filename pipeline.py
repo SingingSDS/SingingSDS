@@ -39,16 +39,31 @@ class SingingDialoguePipeline:
         self.evaluators = load_evaluators(config.get("evaluators", {}).get("svs", []))
 
     def set_asr_model(self, asr_model: str):
+        if self.asr is not None:
+            del self.asr
+            import gc
+            gc.collect()
+            torch.cuda.empty_cache()
         self.asr = get_asr_model(
             asr_model, device=self.device, cache_dir=self.cache_dir
         )
 
     def set_llm_model(self, llm_model: str):
+        if self.llm is not None:
+            del self.llm
+            import gc
+            gc.collect()
+            torch.cuda.empty_cache()
         self.llm = get_llm_model(
             llm_model, device=self.device, cache_dir=self.cache_dir
         )
 
     def set_svs_model(self, svs_model: str):
+        if self.svs is not None:
+            del self.svs
+            import gc
+            gc.collect()
+            torch.cuda.empty_cache()
         self.svs = get_svs_model(
             svs_model, device=self.device, cache_dir=self.cache_dir
         )
