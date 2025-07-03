@@ -37,7 +37,7 @@ class MelodyController:
                 return ""
 
             prompt = (
-                "\n请按照歌词格式回答我的问题，每句需遵循以下字数规则："
+                "\n请按照歌词格式回复，每句需遵循以下字数规则："
                 + "".join(
                     [
                         f"\n第{i}句：{c}个字"
@@ -109,9 +109,10 @@ class MelodyController:
                 if pitch == 0:
                     score.append((st, ed, ref_lyric, pitch))
                 elif ref_lyric in ["-", "——"] and align_type == "lyric":
-                    score.append((st, ed, ref_lyric, pitch))
-                    text_idx += 1
+                    score.append((st, ed, "-", pitch))
                 else:
                     score.append((st, ed, text_list[text_idx], pitch))
                     text_idx += 1
+                    if text_idx >= len(text_list):
+                        break
         return score

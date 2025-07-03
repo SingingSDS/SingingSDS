@@ -12,9 +12,9 @@ pykakasi
 basic-pitch[onnx]
 audiobox_aesthetics
 transformers
-s3prl
 zhconv
 git+https://github.com/sea-turt1e/kanjiconv
 soundfile
 PyYAML
 gradio
+google-generativeai

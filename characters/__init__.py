@@ -14,3 +14,7 @@ for file in pathlib.Path(__file__).parent.glob("*.py"):
     if hasattr(module, "get_character"):
         c: Character = getattr(module, "get_character")()
         CHARACTERS[file.stem] = c
+
+
+def get_character(name: str) -> Character:
+    return CHARACTERS[name]

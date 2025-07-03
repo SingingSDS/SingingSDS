@@ -14,17 +14,17 @@ from .registry import register_svs_model
 
 @register_svs_model("espnet/")
 class ESPNetSVS(AbstractSVSModel):
-    def __init__(self, model_id: str, device="cpu", cache_dir="cache", **kwargs):
+    def __init__(self, model_id: str, device="auto", cache_dir="cache", **kwargs):
         from espnet2.bin.svs_inference import SingingGenerate
         from espnet_model_zoo.downloader import ModelDownloader
-
-        print(f"Downloading {model_id} to {cache_dir}") # TODO: should improve log code
+        if device == "auto":
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.device = device
         downloaded = ModelDownloader(cache_dir).download_and_unpack(model_id)
-        print(f"Downloaded {model_id} to {cache_dir}") # TODO: should improve log code
         self.model = SingingGenerate(
             train_config=downloaded["train_config"],
             model_file=downloaded["model_file"],
-            device=device,
+            device=self.device,
         )
         self.model_id = model_id
         self.output_sample_rate = self.model.fs
@@ -53,7 +53,7 @@ class ESPNetSVS(AbstractSVSModel):
             phoneme_mappers = {}
         return phoneme_mappers
 
-    def _preprocess(self, score: list[tuple[float, float, str, int]], language: str):
+    def _preprocess(self, score: list[tuple[float, float, str, int] | tuple[float, float, str, float]], language: str):
         if language not in self.phoneme_mappers:
             raise ValueError(f"Unsupported language: {language} for {self.model_id}")
         phoneme_mapper = self.phoneme_mappers[language]
@@ -90,16 +90,16 @@ class ESPNetSVS(AbstractSVSModel):
             pre_phn = phn_units[-1]
 
         batch = {
-            "score": {
-                "tempo": 120,  # does not affect svs result, as note durations are in time unit
-                "notes": notes,
-            },
+            "score": (
+                120,  # does not affect svs result, as note durations are in time unit
+                notes,
+            ),
             "text": " ".join(phns),
         }
         return batch
 
     def synthesize(
-        self, score: list[tuple[float, float, str, int]], language: str, speaker: str, **kwargs
+        self, score: list[tuple[float, float, str, float] | tuple[float, float, str, int]], language: str, speaker: str, **kwargs
     ):
         batch = self._preprocess(score, language)
         if self.model_id == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
@@ -107,8 +107,8 @@ class ESPNetSVS(AbstractSVSModel):
             output_dict = self.model(batch, sids=sid)
         elif self.model_id == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
             langs = {
-                "zh": 2,
-                "jp": 1,
+                "mandarin": 2,
+                "japanese": 1,
             }
             if language not in langs:
                 raise ValueError(
