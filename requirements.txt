@@ -17,4 +17,4 @@ git+https://github.com/sea-turt1e/kanjiconv
 soundfile
 PyYAML
 gradio
-google-generativeai
+pydantic==2.10.6
