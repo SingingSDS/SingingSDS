@@ -4,7 +4,7 @@ from pathlib import Path
 
 import yaml
 
-from characters import CHARACTERS
+from characters import get_character
 from pipeline import SingingDialoguePipeline
 
 logger = getLogger(__name__)
@@ -34,7 +34,7 @@ def main():
     speaker = config["speaker"]
     language = config["language"]
     character_name = config["prompt_template_character"]
-    character = CHARACTERS[character_name]
+    character = get_character(character_name)
     prompt_template = character.prompt
     results = pipeline.run(
         args.query_audio,
