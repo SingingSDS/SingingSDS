@@ -69,3 +69,6 @@ melody_sources:
   - id: sample-lyric-kising
     name: Sampled Melody with Lyrics (Kising)
     desc: "Melody with aligned lyrics are sampled from Kising dataset."
+  - id: sample-lyric-genre
+    name: Sampled Melody with Lyrics (Synthetic)
+    desc: "Melody with aligned lyrics are sampled from Kising dataset."

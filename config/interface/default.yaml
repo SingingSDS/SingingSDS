@@ -1,4 +1,4 @@
-asr_model: openai/whisper-large-v3-turbo
+asr_model: openai/whisper-medium
 llm_model: gemini-2.5-flash
 svs_model: espnet/aceopencpop_svs_visinger2_40singer_pretrain
 melody_source: sample-lyric-kising
