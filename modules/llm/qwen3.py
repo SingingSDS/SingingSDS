@@ -1,3 +1,5 @@
+# Ref: https://qwenlm.github.io/blog/qwen3/
+
 from .base import AbstractLLMModel
 from .registry import register_llm_model
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -14,7 +16,13 @@ class Qwen3LLM(AbstractLLMModel):
         ).eval()
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, cache_dir=cache_dir)
 
-    def generate(self, prompt: str, enable_thinking: bool = True, max_new_tokens: int = 32768, **kwargs) -> str:
+    def generate(
+        self,
+        prompt: str,
+        enable_thinking: bool = True,
+        max_new_tokens: int = 32768,
+        **kwargs
+    ) -> str:
         messages = [{"role": "user", "content": prompt}]
         text = self.tokenizer.apply_chat_template(
             messages,
@@ -23,7 +31,9 @@ class Qwen3LLM(AbstractLLMModel):
             enable_thinking=enable_thinking,
         )
         model_inputs = self.tokenizer([text], return_tensors="pt").to(self.model.device)
-        generated_ids = self.model.generate(**model_inputs, max_new_tokens=max_new_tokens)
+        generated_ids = self.model.generate(
+            **model_inputs, max_new_tokens=max_new_tokens
+        )
         output_ids = generated_ids[0][len(model_inputs.input_ids[0]) :].tolist()
         # parse thinking content
         if enable_thinking:
