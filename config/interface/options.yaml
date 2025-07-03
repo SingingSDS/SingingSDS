@@ -7,10 +7,8 @@ asr_models:
     name: Whisper medium
   - id: openai/whisper-small
     name: Whisper small
-  - id: sanchit-gandhi/whisper-small-dv
-    name: Whisper small-dv
-  - id: facebook/wav2vec2-base-960h
-    name: Wav2Vec2-Base-960h
+  - id: funasr/paraformer-zh
+    name: Paraformer-zh
 
 llm_models:
   - id: gemini-2.5-flash
