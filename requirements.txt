@@ -20,5 +20,6 @@ gradio
 google-genai
 funasr
 librosa
+accelerate
 # MiniMax dependencies
 optimum-quanto
