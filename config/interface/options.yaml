@@ -15,12 +15,14 @@ llm_models:
     name: Gemini 2.5 Flash
   - id: google/gemma-2-2b
     name: Gemma 2 2B
-  - id: MiniMaxAI/MiniMax-M1-80k
-    name: MiniMax M1 80k
+  - id: MiniMaxAI/MiniMax-Text-01
+    name: MiniMax Text 01
   - id: meta-llama/Llama-3.1-8B-Instruct
     name: Llama 3.1 8B Instruct
   - id: meta-llama/Llama-3.2-3B-Instruct
     name: Llama 3.2 3B Instruct
+  - id: Qwen/Qwen3-8B
+    name: Qwen3 8B
 
 svs_models:
   - id: mandarin-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
