@@ -80,7 +80,7 @@ def eval_per(audio_path, model=None):
 
 def eval_aesthetic(audio_path, predictor):
     score = predictor.forward([{"path": str(audio_path)}])
-    return {"aesthetic": float(score)}
+    return score
 
 
 # ----------- Main Function -----------
@@ -108,7 +108,7 @@ def run_evaluation(audio_path, evaluators):
     if "melody" in evaluators:
         results.update(eval_melody_metrics(audio_path, evaluators["melody"]))
     if "aesthetic" in evaluators:
-        results.update(eval_aesthetic(audio_path, evaluators["aesthetic"]))
+        results.update(eval_aesthetic(audio_path, evaluators["aesthetic"])[0])
     return results
 
 
