@@ -9,7 +9,6 @@ fastapi
 uvicorn
 fugashi
 pykakasi
-tensorflow
 basic-pitch[onnx]
 audiobox_aesthetics
 transformers
