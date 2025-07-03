@@ -21,5 +21,6 @@ pydantic==2.10.6
 google-genai
 funasr
 librosa
+accelerate
 # MiniMax dependencies
 optimum-quanto
