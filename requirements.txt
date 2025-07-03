@@ -20,5 +20,7 @@ gradio
 google-genai
 funasr
 librosa
+# SingMOS dependencies
+s3prl
 # MiniMax dependencies
 optimum-quanto
