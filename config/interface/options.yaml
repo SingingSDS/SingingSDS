@@ -30,21 +30,21 @@ svs_models:
     model_path: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     lang: mandarin
     voices:
-      voice1: resource/singer/singer_embedding_ace-2.npy
-      voice2: resource/singer/singer_embedding_ace-8.npy
-      voice3: resource/singer/singer_embedding_itako.npy
-      voice4: resource/singer/singer_embedding_kising_orange.npy
-      voice5: resource/singer/singer_embedding_m4singer_Alto-4.npy
+      voice1: resources/singer/singer_embedding_ace-2.npy
+      voice2: resources/singer/singer_embedding_ace-8.npy
+      voice3: resources/singer/singer_embedding_itako.npy
+      voice4: resources/singer/singer_embedding_kising_orange.npy
+      voice5: resources/singer/singer_embedding_m4singer_Alto-4.npy
   - id: japanese-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     name: Visinger2 (Bilingual)-jp
     model_path: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained
     lang: japanese
     voices:
-      voice1: resource/singer/singer_embedding_ace-2.npy
-      voice2: resource/singer/singer_embedding_ace-8.npy
-      voice3: resource/singer/singer_embedding_itako.npy
-      voice4: resource/singer/singer_embedding_kising_orange.npy
-      voice5: resource/singer/singer_embedding_m4singer_Alto-4.npy
+      voice1: resources/singer/singer_embedding_ace-2.npy
+      voice2: resources/singer/singer_embedding_ace-8.npy
+      voice3: resources/singer/singer_embedding_itako.npy
+      voice4: resources/singer/singer_embedding_kising_orange.npy
+      voice5: resources/singer/singer_embedding_m4singer_Alto-4.npy
   - id: mandarin-espnet/aceopencpop_svs_visinger2_40singer_pretrain
     name: Visinger2 (Chinese)
     model_path: espnet/aceopencpop_svs_visinger2_40singer_pretrain
