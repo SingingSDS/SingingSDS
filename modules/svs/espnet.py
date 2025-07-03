@@ -107,8 +107,8 @@ class ESPNetSVS(AbstractSVSModel):
             output_dict = self.model(batch, sids=sid)
         elif self.model_id == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
             langs = {
-                "zh": 2,
-                "jp": 1,
+                "mandarin": 2,
+                "japanese": 1,
             }
             if language not in langs:
                 raise ValueError(
