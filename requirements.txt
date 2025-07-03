@@ -10,6 +10,7 @@ uvicorn
 fugashi
 pykakasi
 tensorflow
+tf_keras
 basic-pitch[onnx]
 audiobox_aesthetics
 transformers
