@@ -1,3 +1,14 @@
+---
+title: SingingSDS
+emoji: 🎶
+colorFrom: pink
+colorTo: yellow
+sdk: gradio
+sdk_version: 5.4.0
+app_file: app.py
+pinned: false
+python_version: 3.11
+---
 # SingingSDS: Role-Playing Singing Spoken Dialogue System
 
 A role-playing singing dialogue system that converts speech input into character-based singing output.
