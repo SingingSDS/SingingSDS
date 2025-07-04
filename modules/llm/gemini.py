@@ -28,6 +28,7 @@ class GeminiLLM(AbstractLLMModel):
         prompt: str,
         system_prompt: Optional[str] = None,
         max_output_tokens: int = 1024,
+        max_iterations: int = 3,
         **kwargs,
     ) -> str:
         generation_config_dict = {
@@ -36,15 +37,17 @@ class GeminiLLM(AbstractLLMModel):
         }
         if system_prompt:
             generation_config_dict["system_instruction"] = system_prompt
-        response = self.client.models.generate_content(
-            model=self.model_id,
-            contents=prompt,
-            config=types.GenerateContentConfig(**generation_config_dict),
-        )
-        if response.text:
-            return response.text
-        else:
-            print(
-                f"No response from Gemini. May need to increase max_new_tokens. Current max_new_tokens: {max_new_tokens}"
+        for _ in range(max_iterations):
+            response = self.client.models.generate_content(
+                model=self.model_id,
+                contents=prompt,
+                config=types.GenerateContentConfig(**generation_config_dict),
             )
-            return ""
+            if response.text:
+                return response.text
+            else:
+                print(
+                    f"No response from Gemini. May need to increase max_output_tokens. Current {max_output_tokens=}. Try again."
+                )
+        print(f"Failed to generate response from Gemini after {max_iterations} attempts.")
+        return ""

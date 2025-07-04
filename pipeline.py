@@ -34,7 +34,7 @@ class SingingDialoguePipeline:
         self.melody_controller = MelodyController(
             config["melody_source"], self.cache_dir
         )
-        self.max_sentences = config.get("max_sentences", 2)
+        self.max_sentences = config.get("max_sentences", 5)
         self.track_latency = config.get("track_latency", False)
         self.evaluators = load_evaluators(config.get("evaluators", {}).get("svs", []))
 
@@ -42,6 +42,7 @@ class SingingDialoguePipeline:
         if self.asr is not None:
             del self.asr
             import gc
+
             gc.collect()
             torch.cuda.empty_cache()
         self.asr = get_asr_model(
@@ -52,6 +53,7 @@ class SingingDialoguePipeline:
         if self.llm is not None:
             del self.llm
             import gc
+
             gc.collect()
             torch.cuda.empty_cache()
         self.llm = get_llm_model(
@@ -62,6 +64,7 @@ class SingingDialoguePipeline:
         if self.svs is not None:
             del self.svs
             import gc
+
             gc.collect()
             torch.cuda.empty_cache()
         self.svs = get_svs_model(
@@ -124,5 +127,5 @@ class SingingDialoguePipeline:
             }
         return results
 
-    def evaluate(self, audio_path):
-        return run_evaluation(audio_path, self.evaluators)
+    def evaluate(self, audio_path, **kwargs):
+        return run_evaluation(audio_path, self.evaluators, **kwargs)

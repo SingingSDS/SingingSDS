@@ -11,7 +11,7 @@ from pathlib import Path
 def init_singmos():
     print("[Init] Loading SingMOS...")
     return torch.hub.load(
-        "South-Twilight/SingMOS:v0.2.0", "singing_ssl_mos", trust_repo=True
+        "South-Twilight/SingMOS:v0.3.0", "singing_ssl_mos", trust_repo=True
     )
 
 
@@ -23,7 +23,17 @@ def init_basic_pitch():
 
 
 def init_per():
-    return None  # TODO: implement PER evaluation
+    print("[Init] Loading PER...")
+    from transformers import pipeline
+    import jiwer
+
+    asr_pipeline = pipeline(
+        "automatic-speech-recognition", model="openai/whisper-large-v3-turbo"
+    )
+    return {
+        "asr_pipeline": asr_pipeline,
+        "jiwer": jiwer,
+    }
 
 
 def init_audiobox_aesthetics():
@@ -72,10 +82,40 @@ def compute_dissonance_rate(intervals, dissonant_intervals={1, 2, 6, 10, 11}):
     return np.mean(dissonant) if intervals else np.nan
 
 
-def eval_per(audio_path, model=None):
+def pypinyin_g2p_phone_without_prosody(text):
+    from pypinyin import Style, pinyin
+    from pypinyin.style._utils import get_finals, get_initials
+
+    phones = []
+    for phone in pinyin(text, style=Style.NORMAL, strict=False):
+        initial = get_initials(phone[0], strict=False)
+        final = get_finals(phone[0], strict=False)
+        if len(initial) != 0:
+            if initial in ["x", "y", "j", "q"]:
+                if final == "un":
+                    final = "vn"
+                elif final == "uan":
+                    final = "van"
+                elif final == "u":
+                    final = "v"
+            if final == "ue":
+                final = "ve"
+            phones.append(initial)
+            phones.append(final)
+        else:
+            phones.append(final)
+    return phones
+
+
+def eval_per(audio_path, reference_text, evaluator):
     audio_array, sr = librosa.load(audio_path, sr=16000)
-    # TODO: implement PER evaluation
-    return {}
+    asr_result = evaluator["asr_pipeline"](
+        audio_array, generate_kwargs={"language": "mandarin"}
+    )["text"]
+    hyp_pinyin = pypinyin_g2p_phone_without_prosody(asr_result)
+    ref_pinyin = pypinyin_g2p_phone_without_prosody(reference_text)
+    per = evaluator["jiwer"].wer(" ".join(ref_pinyin), " ".join(hyp_pinyin))
+    return {"per": per}
 
 
 def eval_aesthetic(audio_path, predictor):
@@ -99,12 +139,12 @@ def load_evaluators(config):
     return loaded
 
 
-def run_evaluation(audio_path, evaluators):
+def run_evaluation(audio_path, evaluators, **kwargs):
     results = {}
     if "singmos" in evaluators:
         results.update(eval_singmos(audio_path, evaluators["singmos"]))
     if "per" in evaluators:
-        results.update(eval_per(audio_path, evaluators["per"]))
+        results.update(eval_per(audio_path, kwargs["llm_text"], evaluators["per"]))
     if "melody" in evaluators:
         results.update(eval_melody_metrics(audio_path, evaluators["melody"]))
     if "aesthetic" in evaluators:
