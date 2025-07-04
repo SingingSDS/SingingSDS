@@ -91,7 +91,7 @@ The system supports multiple preset characters:
 - `meta-llama/Llama-3.2-3B-Instruct`
 
 #### SVS Models
-- `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained` (Bilingual)
+- `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg` (Bilingual)
 - `espnet/aceopencpop_svs_visinger2_40singer_pretrain` (Chinese)
 
 ## Project Structure
