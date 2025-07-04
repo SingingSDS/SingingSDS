@@ -24,6 +24,7 @@ class GradioInterface:
             self.character_info[self.current_character].default_voice
         ]
         self.pipeline = SingingDialoguePipeline(self.default_config)
+        self.results = None
 
     def load_config(self, path: str):
         with open(path, "r") as f:
@@ -218,14 +219,15 @@ class GradioInterface:
             self.current_voice,
             output_audio_path=tmp_file,
         )
+        self.results = results
         formatted_logs = f"ASR: {results['asr_text']}\nLLM: {results['llm_text']}"
         return gr.update(value=formatted_logs), gr.update(
             value=results["output_audio_path"]
         )
 
     def update_metrics(self, audio_path):
-        if not audio_path:
+        if not audio_path or not self.results:
             return gr.update(value="")
-        results = self.pipeline.evaluate(audio_path)
+        results = self.pipeline.evaluate(audio_path, **self.results)
         formatted_metrics = "\n".join([f"{k}: {v}" for k, v in results.items()])
         return gr.update(value=formatted_metrics)
