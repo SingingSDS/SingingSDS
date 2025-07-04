@@ -4,15 +4,8 @@ import numpy as np
 import torch
 import uuid
 from pathlib import Path
-from transformers import pipeline
-import jiwer
 
 # ----------- Initialization -----------
-
-asr_pipeline = pipeline(
-    "automatic-speech-recognition",
-    model="openai/whisper-large-v3-turbo"
-)
 
 def init_singmos():
     print("[Init] Loading SingMOS...")
@@ -29,7 +22,17 @@ def init_basic_pitch():
 
 
 def init_per():
-    return None  # TODO: implement PER evaluation
+    print("[Init] Loading PER...")
+    from transformers import pipeline
+    import jiwer
+    asr_pipeline = pipeline(
+        "automatic-speech-recognition",
+        model="openai/whisper-large-v3-turbo"
+    )
+    return {
+        "asr_pipeline": asr_pipeline,
+        "jiwer": jiwer,
+    }
 
 
 def init_audiobox_aesthetics():
@@ -103,15 +106,15 @@ def pypinyin_g2p_phone_without_prosody(text):
     return phones
 
 
-def eval_per(audio_path, reference_text, model=None):
+def eval_per(audio_path, reference_text, evaluator=None):
     audio_array, sr = librosa.load(audio_path, sr=16000)
-    asr_result = asr_pipeline(
+    asr_result = evaluator['asr_pipeline'](
         audio_array,
         generate_kwargs={"language": "mandarin"}
     )['text']
     hyp_pinyin = pypinyin_g2p_phone_without_prosody(asr_result)
     ref_pinyin = pypinyin_g2p_phone_without_prosody(reference_text)
-    per = jiwer.wer(ref_pinyin, hyp_pinyin)
+    per = evaluator['jiwer'].wer(ref_pinyin, hyp_pinyin)
     return {"per": per}
 
 
