@@ -4,9 +4,14 @@ import numpy as np
 import torch
 import uuid
 from pathlib import Path
+from transformers import pipeline
 
 # ----------- Initialization -----------
 
+asr_pipeline = pipeline(
+    "automatic-speech-recognition",
+    model="openai/whisper-large-v3-turbo"
+)
 
 def init_singmos():
     print("[Init] Loading SingMOS...")
@@ -72,9 +77,38 @@ def compute_dissonance_rate(intervals, dissonant_intervals={1, 2, 6, 10, 11}):
     return np.mean(dissonant) if intervals else np.nan
 
 
+def pypinyin_g2p_phone_without_prosody(text):
+    from pypinyin import Style, pinyin
+    from pypinyin.style._utils import get_finals, get_initials
+
+    phones = []
+    for phone in pinyin(text, style=Style.NORMAL, strict=False):
+        initial = get_initials(phone[0], strict=False)
+        final = get_finals(phone[0], strict=False)
+        if len(initial) != 0:
+            if initial in ["x", "y", "j", "q"]:
+                if final == "un":
+                    final = "vn"
+                elif final == "uan":
+                    final = "van"
+                elif final == "u":
+                    final = "v"
+            if final == "ue":
+                final = "ve"
+            phones.append(initial)
+            phones.append(final)
+        else:
+            phones.append(final)
+    return phones
+
+
 def eval_per(audio_path, model=None):
     audio_array, sr = librosa.load(audio_path, sr=16000)
-    # TODO: implement PER evaluation
+    asr_result = asr_pipeline(
+        audio_array,
+        generate_kwargs={"language": "mandarin"}
+    )['text']
+    hyp_pinyin = pypinyin_g2p_phone_without_prosody(asr_result)
     return {}
 
 
