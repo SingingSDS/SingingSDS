@@ -5,6 +5,7 @@ import torch
 import uuid
 from pathlib import Path
 from transformers import pipeline
+import jiwer
 
 # ----------- Initialization -----------
 
@@ -109,7 +110,9 @@ def eval_per(audio_path, reference_text, model=None):
         generate_kwargs={"language": "mandarin"}
     )['text']
     hyp_pinyin = pypinyin_g2p_phone_without_prosody(asr_result)
-    return {}
+    ref_pinyin = pypinyin_g2p_phone_without_prosody(reference_text)
+    per = jiwer.wer(ref_pinyin, hyp_pinyin)
+    return {"per": per}
 
 
 def eval_aesthetic(audio_path, predictor):
