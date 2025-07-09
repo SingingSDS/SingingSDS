@@ -11,7 +11,7 @@ class KiSing(MelodyDatasetHandler):
         from datasets import load_dataset
 
         song_db = load_dataset(
-            "jhansss/kising_score_segments", cache_dir=cache_dir, split="train"
+            "espnet/kising_score_segments", cache_dir=cache_dir, split="train"
         ).to_pandas()
         song_db.set_index("segment_id", inplace=True)
         assert (
