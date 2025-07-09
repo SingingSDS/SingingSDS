@@ -1,11 +1,10 @@
-asr_model: openai/whisper-small
-llm_model: google/gemma-2-2b
-svs_model: espnet/aceopencpop_svs_visinger2_40singer_pretrain
+asr_model: openai/whisper-medium
+llm_model: meta-llama/Llama-3.1-8B-Instruct
+svs_model: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg
 melody_source: sample-lyric-kising
 language: mandarin
-max_sentences: 1
 prompt_template_character: Yaoyin
-speaker: 9
+speaker: resources/singer/singer_embedding_ace-2.npy
 cache_dir: .cache
 
 track_latency: True
