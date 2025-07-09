@@ -9,7 +9,7 @@ from .registry import register_llm_model
 hf_token = os.getenv("HF_TOKEN")
 
 
-@register_llm_model("google/gemma-")
+@register_llm_model("google/gemma-2-")
 class GemmaLLM(AbstractLLMModel):
     def __init__(
         self, model_id: str, device: str = "auto", cache_dir: str = "cache", **kwargs

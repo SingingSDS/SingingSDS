@@ -109,41 +109,23 @@ The system supports multiple preset characters:
 
 ```
 SingingSDS/
-├── cli.py                 # Command line interface
-├── interface.py           # Gradio interface
-├── pipeline.py            # Core processing pipeline
-├── app.py                 # Web application entry
-├── requirements.txt       # Python dependencies
-├── config/                # Configuration files
-│   ├── cli/               # CLI-specific configuration
-│   └── interface/         # Interface-specific configuration
-├── modules/               # Core modules
-│   ├── asr.py            # Speech recognition module
-│   ├── llm.py            # Large language model module
-│   ├── melody.py         # Melody control module
-│   ├── svs/              # Singing voice synthesis modules
-│   │   ├── base.py       # Base SVS class
-│   │   ├── espnet.py     # ESPnet SVS implementation
-│   │   ├── registry.py   # SVS model registry
-│   │   └── __init__.py   # SVS module initialization
-│   └── utils/            # Utility modules
-│       ├── g2p.py        # Grapheme-to-phoneme conversion
-│       ├── text_normalize.py # Text normalization
-│       └── resources/    # Utility resources
-├── characters/            # Character definitions
-│   ├── base.py           # Base character class
-│   ├── Limei.py          # Limei character definition
-│   ├── Yaoyin.py         # Yaoyin character definition
-│   └── __init__.py       # Character module initialization
-├── evaluation/            # Evaluation modules
-│   └── svs_eval.py       # SVS evaluation metrics
-├── data/                  # Data directory
-│   ├── kising/           # Kising dataset
-│   └── touhou/           # Touhou dataset
-├── resources/             # Project resources
-├── data_handlers/         # Data handling utilities
-├── assets/                # Static assets
-└── tests/                 # Test files
+├── app.py, cli.py               # Entry points (demo app & CLI)
+├── pipeline.py                  # Main orchestration pipeline
+├── interface.py                 # Gradio interface
+├── characters/                  # Virtual character definitions
+├── modules/                     # Core modules
+│   ├── asr/                     # ASR models (Whisper, Paraformer)
+│   ├── llm/                     # LLMs (Gemini, LLaMA, etc.)
+│   ├── svs/                     # Singing voice synthesis (ESPnet)
+│   └── utils/                   # G2P, text normalization, resources
+├── config/                      # YAML configuration files 
+├── data/                        # Dataset metadata and length info
+├── data_handlers/               # Parsers for KiSing, Touhou, etc.
+├── evaluation/                  # Evaluation metrics
+├── resources/                   # Singer embeddings, phoneme dicts, MIDI
+├── assets/                      # Character visuals
+├── tests/                       # Unit tests and sample audios
+└── README.md, requirements.txt
 ```
 
 ## Contributing

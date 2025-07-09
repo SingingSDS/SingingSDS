@@ -11,7 +11,7 @@ from pathlib import Path
 def init_singmos():
     print("[Init] Loading SingMOS...")
     return torch.hub.load(
-        "South-Twilight/SingMOS:v0.3.0", "singing_ssl_mos", trust_repo=True
+        "South-Twilight/SingMOS:v0.3.0", "singing_ssl_mos", trust_repo=True, cache_dir="cache"
     )
 
 

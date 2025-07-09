@@ -17,6 +17,7 @@ class ESPNetSVS(AbstractSVSModel):
     def __init__(self, model_id: str, device="auto", cache_dir="cache", **kwargs):
         from espnet2.bin.svs_inference import SingingGenerate
         from espnet_model_zoo.downloader import ModelDownloader
+
         if device == "auto":
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.device = device
@@ -35,7 +36,10 @@ class ESPNetSVS(AbstractSVSModel):
             phoneme_mappers = {
                 "mandarin": pinyin_to_phonemes_opencpop,
             }
-        elif self.model_id == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
+        elif self.model_id in [
+            "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
+            "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg",
+        ]:
 
             def mandarin_mapper(pinyin: str) -> list[str]:
                 phns = pinyin_to_phonemes_ace(pinyin)
@@ -53,7 +57,11 @@ class ESPNetSVS(AbstractSVSModel):
             phoneme_mappers = {}
         return phoneme_mappers
 
-    def _preprocess(self, score: list[tuple[float, float, str, int] | tuple[float, float, str, float]], language: str):
+    def _preprocess(
+        self,
+        score: list[tuple[float, float, str, int] | tuple[float, float, str, float]],
+        language: str,
+    ):
         if language not in self.phoneme_mappers:
             raise ValueError(f"Unsupported language: {language} for {self.model_id}")
         phoneme_mapper = self.phoneme_mappers[language]
@@ -88,6 +96,9 @@ class ESPNetSVS(AbstractSVSModel):
             notes.append((st, ed, "".join(lyric_units), pitch, "_".join(phn_units)))
             phns.extend(phn_units)
             pre_phn = phn_units[-1]
+        # add a silence at the end
+        notes.append((notes[-1][1], notes[-1][1] + 0.2, "AP", 0, "AP"))
+        phns.append("AP")
 
         batch = {
             "score": (
@@ -99,13 +110,20 @@ class ESPNetSVS(AbstractSVSModel):
         return batch
 
     def synthesize(
-        self, score: list[tuple[float, float, str, float] | tuple[float, float, str, int]], language: str, speaker: str, **kwargs
+        self,
+        score: list[tuple[float, float, str, float] | tuple[float, float, str, int]],
+        language: str,
+        speaker: str,
+        **kwargs,
     ):
         batch = self._preprocess(score, language)
         if self.model_id == "espnet/aceopencpop_svs_visinger2_40singer_pretrain":
             sid = np.array([int(speaker)])
             output_dict = self.model(batch, sids=sid)
-        elif self.model_id == "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained":
+        elif self.model_id in [
+            "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
+            "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg",
+        ]:
             langs = {
                 "mandarin": 2,
                 "japanese": 1,

@@ -202,6 +202,7 @@ class GradioInterface:
 
     def update_melody_source(self, melody_source):
         self.current_melody_source = melody_source
+        self.pipeline.set_melody_controller(melody_source)
         return gr.update(value=self.current_melody_source)
 
     def update_voice(self, voice):
