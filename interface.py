@@ -51,7 +51,10 @@ class GradioInterface:
                             label="Interaction Log", lines=3, interactive=False
                         )
                         audio_output = gr.Audio(
-                            label="Character's Response", type="filepath", autoplay=True
+                            label="Character's Response",
+                            type="filepath",
+                            autoplay=True,
+                            interactive=False,
                         )
 
                         with gr.Row():
