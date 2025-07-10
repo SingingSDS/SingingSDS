@@ -214,7 +214,7 @@ class GradioInterface:
 
     def run_pipeline(self, audio_path):
         if not audio_path:
-            return gr.update(value=""), gr.update(value="")
+            return gr.update(value=None), gr.update(value=None)
         tmp_file = f"audio_{int(time.time())}_{uuid.uuid4().hex[:8]}.wav"
         self.results = self.pipeline.run(
             audio_path,
