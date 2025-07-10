@@ -27,7 +27,7 @@ class GeminiLLM(AbstractLLMModel):
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
-        max_output_tokens: int = 1024,
+        max_output_tokens: int = 8192,
         max_iterations: int = 3,
         **kwargs,
     ) -> str:
