@@ -14,7 +14,7 @@ basic-pitch[onnx]
 audiobox_aesthetics
 transformers
 zhconv
-git+https://github.com/sea-turt1e/kanjiconv
+pykakasi
 soundfile
 PyYAML
 gradio
