@@ -6,7 +6,7 @@ A role-playing singing dialogue system that converts speech input into character
 
 ### Requirements
 
-- Python 3.11+
+- Python 3.10 or 3.11
 - CUDA (optional, for GPU acceleration)
 
 ### Install Dependencies
