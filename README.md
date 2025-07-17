@@ -97,13 +97,17 @@ The system supports multiple preset characters:
 - `openai/whisper-large-v3-turbo`
 - `openai/whisper-large-v3`
 - `openai/whisper-medium`
-- `sanchit-gandhi/whisper-small-dv`
-- `facebook/wav2vec2-base-960h`
+- `openai/whisper-small`
+- `funasr/paraformer-zh`
 
 #### LLM Models
+- `gemini-2.5-flash`
 - `google/gemma-2-2b`
-- `MiniMaxAI/MiniMax-M1-80k`
 - `meta-llama/Llama-3.2-3B-Instruct`
+- `meta-llama/Llama-3.1-8B-Instruct`
+- `Qwen/Qwen3-8B`
+- `Qwen/Qwen3-30B-A3B`
+- `MiniMaxAI/MiniMax-Text-01`
 
 #### SVS Models
 - `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg` (Bilingual)
