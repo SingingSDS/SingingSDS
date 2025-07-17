@@ -47,7 +47,22 @@ pip install -r requirements.txt
 #### Example Usage
 
 ```bash
-python cli.py --query_audio tests/audio/hello.wav --config_path config/cli/yaoyin_default.yaml --output_audio outputs/yaoyin_hello.wav
+python cli.py \
+  --query_audio tests/audio/hello.wav \
+  --config_path config/cli/yaoyin_default.yaml \
+  --output_audio outputs/yaoyin_hello.wav \
+  --eval_results_csv outputs/yaoyin_test.csv
+```
+
+#### Inference-Only Mode
+
+Run minimal inference without evaluation.
+
+```bash
+python cli.py \
+  --query_audio tests/audio/hello.wav \
+  --config_path config/cli/yaoyin_default_infer_only.yaml \
+  --output_audio outputs/yaoyin_hello.wav
 ```
 
 #### Parameter Description
