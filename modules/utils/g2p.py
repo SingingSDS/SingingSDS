@@ -3,12 +3,12 @@ import re
 import warnings
 from pathlib import Path
 
-from kanjiconv import KanjiConv
+import pykakasi
 from pypinyin import lazy_pinyin
 
 from .resources.pinyin_dict import PINYIN_DICT
 
-kanji_to_kana = KanjiConv()
+kks = pykakasi.kakasi()
 
 yoon_map = {
     "ぁ": "あ",
@@ -32,9 +32,9 @@ for plan in ace_phonemes_all_plans["plans"]:
 
 
 def preprocess_text(text: str, language: str) -> list[str]:
-    text = text.replace(" ", "")
     if language == "mandarin":
         text_list = to_pinyin(text)
+        text_list = [pinyin for pinyin in text_list if pinyin != " "]
     elif language == "japanese":
         text_list = to_kana(text)
     else:
@@ -117,7 +117,9 @@ def replace_chouonpu(hiragana_text: str) -> str:
 
 
 def to_kana(text: str) -> list[str]:
-    hiragana_text = kanji_to_kana.to_hiragana(text.replace(" ", ""))
+    hiragana_text = "".join(
+        [item["hira"] for item in kks.convert(text.replace(" ", ""))]
+    )
     hiragana_text_wl = replace_chouonpu(hiragana_text).split(" ")
     final_ls = []
     for subword in hiragana_text_wl:
