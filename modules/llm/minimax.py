@@ -77,7 +77,8 @@ class MiniMaxLLM(AbstractLLMModel):
             )
         except Exception as e:
             print(f"Failed to load MiniMax model: {e}")
-            breakpoint()
+            import traceback
+            print(traceback.format_exc())
             raise e
 
     def generate(

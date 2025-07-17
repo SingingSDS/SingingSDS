@@ -159,8 +159,8 @@ class GradioInterface:
 
             return demo
         except Exception as e:
-            print(f"error: {e}")
-            breakpoint()
+            import traceback
+            print(traceback.format_exc())
             return gr.Blocks()
 
     def update_character(self, character):

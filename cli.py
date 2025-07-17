@@ -69,8 +69,8 @@ def main():
                         f"{query_audio},{config['asr_model']},{config['llm_model']},{config['svs_model']},{config['melody_source']},{config['language']},{config['speaker']},{output_audio},{results['asr_text']},{results['llm_text']},{metrics_str}\n"
                     )
     except Exception as e:
-        logger.error(f"Error in main: {e}")
-        breakpoint()
+        import traceback
+        logger.error(traceback.format_exc())
         raise e
 
 
