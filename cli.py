@@ -17,7 +17,7 @@ def get_parser():
         "--config_path", type=Path, default="config/cli/yaoyin_default.yaml"
     )
     parser.add_argument("--output_audio_folder", type=Path, required=True)
-    parser.add_argument("--eval_results_csv", type=Path, required=True)
+    parser.add_argument("--eval_results_csv", type=Path, default=None)
     return parser
 
 
@@ -38,11 +38,15 @@ def main():
     character = get_character(character_name)
     prompt_template = character.prompt
     args.output_audio_folder.mkdir(parents=True, exist_ok=True)
-    args.eval_results_csv.parent.mkdir(parents=True, exist_ok=True)
-    with open(args.eval_results_csv, "a") as f:
-        f.write(
-            f"query_audio,asr_model,llm_model,svs_model,melody_source,language,speaker,output_audio,asr_text,llm_text,metrics\n"
-        )
+    if config.get("evaluators", {}):
+        if args.eval_results_csv:
+            args.eval_results_csv.parent.mkdir(parents=True, exist_ok=True)
+            with open(args.eval_results_csv, "a") as f:
+                f.write(
+                    f"query_audio,asr_model,llm_model,svs_model,melody_source,language,speaker,output_audio,asr_text,llm_text,metrics\n"
+                )
+        else:
+            logger.warning("No eval_results_csv provided, skipping evaluation")
     try:
         for query_audio in args.query_audios:
             output_audio = args.output_audio_folder / f"{query_audio.stem}_response.wav"
@@ -53,16 +57,17 @@ def main():
                 speaker,
                 output_audio_path=output_audio,
             )
-            metrics = pipeline.evaluate(output_audio, **results)
-            metrics.update(results.get("metrics", {}))
-            metrics_str = ",".join([f"{metrics[k]}" for k in sorted(metrics.keys())])
-            logger.info(
-                f"Input: {query_audio}, Output: {output_audio}, ASR results: {results['asr_text']}, LLM results: {results['llm_text']}"
-            )
-            with open(args.eval_results_csv, "a") as f:
-                f.write(
-                    f"{query_audio},{config['asr_model']},{config['llm_model']},{config['svs_model']},{config['melody_source']},{config['language']},{config['speaker']},{output_audio},{results['asr_text']},{results['llm_text']},{metrics_str}\n"
+            if args.eval_results_csv and config.get("evaluators", {}):
+                metrics = pipeline.evaluate(output_audio, **results)
+                metrics.update(results.get("metrics", {}))
+                metrics_str = ",".join([f"{metrics[k]}" for k in sorted(metrics.keys())])
+                logger.info(
+                    f"Input: {query_audio}, Output: {output_audio}, ASR results: {results['asr_text']}, LLM results: {results['llm_text']}"
                 )
+                with open(args.eval_results_csv, "a") as f:
+                    f.write(
+                        f"{query_audio},{config['asr_model']},{config['llm_model']},{config['svs_model']},{config['melody_source']},{config['language']},{config['speaker']},{output_audio},{results['asr_text']},{results['llm_text']},{metrics_str}\n"
+                    )
     except Exception as e:
         logger.error(f"Error in main: {e}")
         breakpoint()
