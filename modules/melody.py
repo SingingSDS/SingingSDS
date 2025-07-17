@@ -25,7 +25,7 @@ class MelodyController:
     def get_melody_constraints(self, max_num_phrases: int = 5) -> str:
         """Return a lyric-format prompt based on melody structure."""
         if self.mode == "gen":
-            return ""
+            prompt = ""
 
         elif self.mode == "sample":
             assert self.database is not None, "Song database is not loaded."
@@ -46,10 +46,11 @@ class MelodyController:
                 )
                 + "\n如果没有足够的信息回答，请使用最少的句子，不要重复、不要扩展、不要加入无关内容。\n"
             )
-            return prompt
 
         else:
             raise ValueError(f"Unsupported melody mode: {self.mode}")
+        prompt += "请使用用户输入的语言回答"
+        return prompt
 
     def generate_score(
         self, lyrics: str, language: str
