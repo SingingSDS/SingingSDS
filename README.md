@@ -193,11 +193,8 @@ The Yaoyin (遥音) character assets, including [`character_yaoyin.png`](./asset
 
 ### Code License
 
-All source code in this repository is licensed under the  
-[MIT License](./LICENSE).
+All source code in this repository is licensed under the [MIT License](./LICENSE). This license applies **only to the code**. Character assets remain under their separate license and restrictions, as described in the **Character Assets** section.
 
-This license applies **only to the code**.  
-Character assets remain under their separate license and restrictions as described in the **Character Assets** section.
 
 ---
 
