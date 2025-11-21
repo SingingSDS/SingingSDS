@@ -4,7 +4,7 @@
 
 **A role-playing singing dialogue system that converts speech input into character-based singing output.**
 
-![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange) [![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/SingingSDS/SingingSDS) [![HuggingFace Demo](https://img.shields.io/badge/🤗%20HuggingFace-Demo-yellow)](https://huggingface.co/spaces/espnet/SingingSDS) ![YouTube](https://img.shields.io/badge/YouTube-Coming%20Soon-red)
+![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange) [![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/SingingSDS/SingingSDS) [![HuggingFace Demo](https://img.shields.io/badge/🤗%20HuggingFace-Demo-yellow)](https://huggingface.co/spaces/espnet/SingingSDS) [![YouTube](https://img.shields.io/badge/YouTube-Playlist-red)](https://www.youtube.com/playlist?list=PLZpUJJbwp2WvtPBenG5D3h09qKIrt24ui)
 
 </div>
 
@@ -12,12 +12,10 @@
 
 SingingSDS is an innovative role-playing singing dialogue system that seamlessly converts natural speech input into character-based singing output. The system integrates automatic speech recognition (ASR), large language models (LLM), and singing voice synthesis (SVS) to create an immersive conversational singing experience.
 
-## 🔗 Quick Links
-
-- **📄 Paper**: Coming soon
-- **💻 Code**: [GitHub Repository](https://github.com/SingingSDS/SingingSDS)
-- **🎵 HuggingFace Demo**: [Try it online!](https://huggingface.co/spaces/espnet/SingingSDS)
-- **🎬 Video Demo**: Coming soon
+<div align="center">
+  <img src="assets/demo.png" alt="SingingSDS Interface" style="max-width: 100%; height: auto;"/>
+  <p><em>SingingSDS Web Interface: Interactive singing dialogue system with character visualization, audio I/O, evaluation metrics, and flexible configuration options.</em></p>
+</div>
 
 ## 🚀 Installation
 
@@ -111,7 +109,6 @@ python cli.py \
 - `--config_path`: Configuration file path (default: config/cli/yaoyin_default.yaml)
 - `--output_audio`: Output audio file path (required)
 
-
 ### 🌐 Web Interface (Gradio)
 
 Start the web interface:
@@ -136,24 +133,30 @@ The system supports multiple preset characters:
 ### Model Configuration
 
 #### ASR Models
-- `openai/whisper-large-v3-turbo`
-- `openai/whisper-large-v3`
-- `openai/whisper-medium`
-- `openai/whisper-small`
-- `funasr/paraformer-zh`
+| Model | Description |
+|-------|-------------|
+| `openai/whisper-large-v3-turbo` | Latest Whisper model with turbo optimization |
+| `openai/whisper-large-v3` | Large Whisper v3 model |
+| `openai/whisper-medium` | Medium-sized Whisper model |
+| `openai/whisper-small` | Small Whisper model |
+| `funasr/paraformer-zh` | Paraformer for Chinese ASR |
 
 #### LLM Models
-- `gemini-2.5-flash`
-- `google/gemma-2-2b`
-- `meta-llama/Llama-3.2-3B-Instruct`
-- `meta-llama/Llama-3.1-8B-Instruct`
-- `Qwen/Qwen3-8B`
-- `Qwen/Qwen3-30B-A3B`
-- `MiniMaxAI/MiniMax-Text-01`
+| Model | Description |
+|-------|-------------|
+| `gemini-2.5-flash` | Google Gemini 2.5 Flash |
+| `google/gemma-2-2b` | Google Gemma 2B model |
+| `meta-llama/Llama-3.2-3B-Instruct` | Meta Llama 3.2 3B Instruct |
+| `meta-llama/Llama-3.1-8B-Instruct` | Meta Llama 3.1 8B Instruct |
+| `Qwen/Qwen3-8B` | Qwen3 8B model |
+| `Qwen/Qwen3-30B-A3B` | Qwen3 30B A3B model |
+| `MiniMaxAI/MiniMax-Text-01` | MiniMax Text model |
 
 #### SVS Models
-- `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg` (Bilingual)
-- `espnet/aceopencpop_svs_visinger2_40singer_pretrain` (Chinese)
+| Model | Language Support |
+|------|------------------|
+| `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg` | Bilingual (Chinese & Japanese) |
+| `espnet/aceopencpop_svs_visinger2_40singer_pretrain` | Chinese |
 
 ## 📁 Project Structure
 
@@ -186,21 +189,21 @@ We welcome contributions! Please feel free to submit issues and pull requests.
 
 ### Character Assets
 
-The **Yaoyin (遥音)** character assets are licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/).
-
-**Important Additional Terms**: The Yaoyin character assets may **not** be used for training, fine-tuning, or improving artificial intelligence or machine learning models, including neural networks, diffusion models, or large language models, whether for commercial or non-commercial use.
-
-For full license details, please see [`assets/character_yaoyin.LICENSE`](assets/character_yaoyin.LICENSE).
+The Yaoyin (遥音) character assets, including [`character_yaoyin.png`](./assets/character_yaoyin.png) created by illustrator Zihe Zhou, are commissioned exclusively for the SingingSDS project. Screenshots of the system that include these assets, such as [`demo.png`](./assets/demo.png), are also covered under this license. The assets may be used only for direct derivatives of SingingSDS, such as project-related posts, usage videos, or other content directly depicting the project. Any other use requires express permission from the illustrator, and these assets may not be used for training, fine-tuning, or improving any artificial intelligence or machine learning models. For full license details, see [`assets/character_yaoyin.LICENSE`](./assets/character_yaoyin.LICENSE).
 
 ### Code License
 
-*Code license information to be added.*
+All source code in this repository is licensed under the  
+[MIT License](./LICENSE).
+
+This license applies **only to the code**.  
+Character assets remain under their separate license and restrictions as described in the **Character Assets** section.
 
 ---
 
 <div align="center">
 
-Paper (Coming soon) • [Code](https://github.com/SingingSDS/SingingSDS) • [Demo](https://huggingface.co/spaces/espnet/SingingSDS) • Video (Coming soon)
+Paper (Coming soon) • [Code](https://github.com/SingingSDS/SingingSDS) • [Demo](https://huggingface.co/spaces/espnet/SingingSDS) • [Video](https://www.youtube.com/playlist?list=PLZpUJJbwp2WvtPBenG5D3h09qKIrt24ui)
 
 </div>
 
