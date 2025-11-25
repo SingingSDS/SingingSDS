@@ -39,6 +39,7 @@ class ESPNetSVS(AbstractSVSModel):
         elif self.model_id in [
             "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
             "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg",
+            "espnet/visinger2-zh-jp-multisinger-svs",
         ]:
 
             def mandarin_mapper(pinyin: str) -> list[str]:
@@ -123,6 +124,7 @@ class ESPNetSVS(AbstractSVSModel):
         elif self.model_id in [
             "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained",
             "espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg",
+            "espnet/visinger2-zh-jp-multisinger-svs",
         ]:
             langs = {
                 "mandarin": 2,

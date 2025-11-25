@@ -25,9 +25,9 @@ llm_models:
     name: Qwen3 30B A3B
 
 svs_models:
-  - id: mandarin-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg
+  - id: mandarin-espnet/visinger2-zh-jp-multisinger-svs
     name: Visinger2 (Bilingual)-zh
-    model_path: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg
+    model_path: espnet/visinger2-zh-jp-multisinger-svs
     lang: mandarin
     voices:
       voice1: resources/singer/singer_embedding_ace-2.npy
@@ -35,9 +35,9 @@ svs_models:
       voice3: resources/singer/singer_embedding_itako.npy
       voice4: resources/singer/singer_embedding_kising_orange.npy
       voice5: resources/singer/singer_embedding_m4singer_Alto-4.npy
-  - id: japanese-espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg
+  - id: japanese-espnet/visinger2-zh-jp-multisinger-svs
     name: Visinger2 (Bilingual)-jp
-    model_path: espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg
+    model_path: espnet/visinger2-zh-jp-multisinger-svs
     lang: japanese
     voices:
       voice1: resources/singer/singer_embedding_ace-2.npy

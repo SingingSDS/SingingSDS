@@ -155,8 +155,8 @@ The system supports multiple preset characters:
 #### SVS Models
 | Model | Language Support |
 |------|------------------|
-| `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg` | Bilingual (Chinese & Japanese) |
-| `espnet/espnet/visinger2-zh-jp-multisinger-svs` | Chinese |
+| `espnet/visinger2-zh-jp-multisinger-svs` | Bilingual (Chinese & Japanese) |
+| `espnet/aceopencpop_svs_visinger2_40singer_pretrain` | Chinese |
 
 ## 📁 Project Structure
 
@@ -195,6 +195,9 @@ The Yaoyin (遥音) character assets, including [`character_yaoyin.png`](./asset
 
 All source code in this repository is licensed under the [MIT License](./LICENSE). This license applies **only to the code**. Character assets remain under their separate license and restrictions, as described in the **Character Assets** section.
 
+### Model License
+
+The models used in SingingSDS are subject to their respective licenses and terms of use. Users must comply with each model’s official license, which can be found at the respective model’s official repository or website.
 
 ---
 
