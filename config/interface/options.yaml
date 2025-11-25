@@ -32,7 +32,7 @@ svs_models:
     voices:
       voice1: resources/singer/singer_embedding_ace-2.npy
       voice2: resources/singer/singer_embedding_ace-8.npy
-      voice3: resources/singer/singer_embedding_itako.npy
+      voice3: resources/singer/singer_embedding_ace-27.npy
       voice4: resources/singer/singer_embedding_kising_orange.npy
       voice5: resources/singer/singer_embedding_m4singer_Alto-4.npy
   - id: japanese-espnet/visinger2-zh-jp-multisinger-svs
@@ -42,7 +42,7 @@ svs_models:
     voices:
       voice1: resources/singer/singer_embedding_ace-2.npy
       voice2: resources/singer/singer_embedding_ace-8.npy
-      voice3: resources/singer/singer_embedding_itako.npy
+      voice3: resources/singer/singer_embedding_ace-27.npy
       voice4: resources/singer/singer_embedding_kising_orange.npy
       voice5: resources/singer/singer_embedding_m4singer_Alto-4.npy
   - id: mandarin-espnet/aceopencpop_svs_visinger2_40singer_pretrain
