@@ -156,7 +156,7 @@ The system supports multiple preset characters:
 | Model | Language Support |
 |------|------------------|
 | `espnet/mixdata_svs_visinger2_spkemb_lang_pretrained_avg` | Bilingual (Chinese & Japanese) |
-| `espnet/aceopencpop_svs_visinger2_40singer_pretrain` | Chinese |
+| `espnet/espnet/visinger2-zh-jp-multisinger-svs` | Chinese |
 
 ## 📁 Project Structure
 
