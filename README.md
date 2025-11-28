@@ -4,7 +4,7 @@
 
 **A role-playing singing dialogue system that converts speech input into character-based singing output.**
 
-![Paper](https://img.shields.io/badge/Paper-Coming%20Soon-orange) [![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/SingingSDS/SingingSDS) [![HuggingFace Demo](https://img.shields.io/badge/🤗%20HuggingFace-Demo-yellow)](https://huggingface.co/spaces/espnet/SingingSDS) [![YouTube](https://img.shields.io/badge/YouTube-Playlist-red)](https://www.youtube.com/playlist?list=PLZpUJJbwp2WvtPBenG5D3h09qKIrt24ui)
+[![Paper](https://img.shields.io/badge/Paper-arXiv:2511.20972-b31b1b)](https://arxiv.org/abs/2511.20972) [![Code](https://img.shields.io/badge/Code-GitHub-black)](https://github.com/SingingSDS/SingingSDS) [![HuggingFace Demo](https://img.shields.io/badge/🤗%20HuggingFace-Demo-yellow)](https://huggingface.co/spaces/espnet/SingingSDS) [![YouTube](https://img.shields.io/badge/YouTube-Playlist-red)](https://www.youtube.com/playlist?list=PLZpUJJbwp2WvtPBenG5D3h09qKIrt24ui)
 
 </div>
 
@@ -195,15 +195,15 @@ The Yaoyin (遥音) character assets, including [`character_yaoyin.png`](./asset
 
 All source code in this repository is licensed under the [MIT License](./LICENSE). This license applies **only to the code**. Character assets remain under their separate license and restrictions, as described in the **Character Assets** section.
 
-### Model License
+### Model and Dataset License
 
-The models used in SingingSDS are subject to their respective licenses and terms of use. Users must comply with each model’s official license, which can be found at the respective model’s official repository or website.
+The models and datasets used in SingingSDS are subject to their respective licenses and terms of use. Users must comply with each model's and dataset's official license, which can be found at the respective model's or dataset's official repository or website.
 
 ---
 
 <div align="center">
 
-Paper (Coming soon) • [Code](https://github.com/SingingSDS/SingingSDS) • [Demo](https://huggingface.co/spaces/espnet/SingingSDS) • [Video](https://www.youtube.com/playlist?list=PLZpUJJbwp2WvtPBenG5D3h09qKIrt24ui)
+[Paper](https://arxiv.org/abs/2511.20972) • [Code](https://github.com/SingingSDS/SingingSDS) • [Demo](https://huggingface.co/spaces/espnet/SingingSDS) • [Video](https://www.**youtube**.com/playlist?list=PLZpUJJbwp2WvtPBenG5D3h09qKIrt24ui)
 
 </div>
 
